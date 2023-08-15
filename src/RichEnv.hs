@@ -1,4 +1,4 @@
-module RichEnv (clearEnvironment, richEnv, varMaps, varPrefixes, varValues, RichEnv, RichEnvItem) where
+module RichEnv (clearEnvironment, richEnv, varMaps, varPrefixes, varValues, RichEnv, RichEnvItem, VarMap, VarPrefix, VarValue) where
 
 import Control.Monad (join)
 import Data.Bifunctor (bimap)
@@ -57,7 +57,7 @@ data VarPrefix = VarPrefix
 clearEnvironment :: IO ()
 clearEnvironment = getEnvironment >>= mapM_ (unsetEnv . fst)
 
--- | Sets the environment variables available to the current process abiding to the @RichEnv@ rules.
+-- | Sets the environment variables available to the current process abiding to the 'RichEnv' rules.
 richEnv :: RichEnv -> IO ()
 richEnv re = do
     currentEnv <- M.fromList . texts <$> getEnvironment
@@ -73,21 +73,21 @@ richEnv re = do
 
 {- FILTERING TYPE VARIANTS -}
 
--- | Gets only the @EnvVarNameMap@ items from a @RichEnv@.
+-- | Gets only the 'VarMap' items from a 'RichEnv'.
 varMaps :: RichEnv -> Set VarMap
 varMaps = S.foldr f S.empty
   where
     f (EnvVarNameMap vm) = S.insert vm
     f _ = id
 
--- | Gets only the @EnvVarValue@ items from a @RichEnv@.
+-- | Gets only the 'VarValue' items from a 'RichEnv'.
 varValues :: RichEnv -> Set VarValue
 varValues = S.foldr f S.empty
   where
     f (EnvVarValue vv) = S.insert vv
     f _ = id
 
--- | Gets only the @EnvVarPrefix@ items from a @RichEnv@.
+-- | Gets only the 'VarPrefix' items from a 'RichEnv'.
 varPrefixes :: RichEnv -> Set VarPrefix
 varPrefixes = S.foldr f S.empty
   where
@@ -96,7 +96,7 @@ varPrefixes = S.foldr f S.empty
 
 {- END FILTERING TYPE VARIANTS -}
 
--- | Takes all the @VarValue@s and sets them as environment variables.
+-- | Takes all the 'VarValue's and sets them as environment variables.
 setVarValues :: Set VarValue -> IO ()
 setVarValues = mapM_ setEnvFromItem
   where
@@ -129,7 +129,7 @@ setPrefixedVars cEnv = mapM_ setPrefixedVar
 
 {- AUXILIARY FUNCTIONS -}
 
--- | Converts the @[(String, String)]@ returned by @getEnvironment@ into a @[(Text, Text)]@.
+-- | Converts the '[(String, String)]@ returned by 'getEnvironment' into a @[(Text, Text)]@.
 texts :: [(String, String)] -> [(Text, Text)]
 texts = fmap $ join bimap pack
 
