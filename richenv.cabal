@@ -91,7 +91,10 @@ common common-options
 
   -- Base language which the package is written in.
   default-language:   Haskell2010
-  default-extensions: OverloadedStrings
+  default-extensions:
+    DerivingStrategies
+    ImportQualifiedPost
+    OverloadedStrings
 
 library
   -- Import common options.
@@ -107,31 +110,38 @@ library
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:   base ^>=4.16.4.0
+  build-depends:
+    , base        ^>=4.16.4.0
+    , containers
+    , text
 
   -- Directories containing source files.
   hs-source-dirs:  src
 
 test-suite richenv-test
   -- Import common options.
-  import:         common-options
+  import:             common-options
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:      RichEnvSpec
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- The interface type and version of the test suite.
-  type:           exitcode-stdio-1.0
+  type:               exitcode-stdio-1.0
 
   -- Directories containing source files.
-  hs-source-dirs: test
+  hs-source-dirs:     test
 
   -- The entrypoint to the test suite.
-  main-is:        Main.hs
+  main-is:            Spec.hs
 
   -- Test dependencies.
   build-depends:
-    , base     ^>=4.16.4.0
+    , base        ^>=4.16.4.0
+    , hspec
+    , QuickCheck
     , richenv
+
+  build-tool-depends: hspec-discover:hspec-discover
