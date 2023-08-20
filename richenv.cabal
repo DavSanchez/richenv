@@ -106,6 +106,7 @@ library
   -- Modules included in this library but not exported.
   other-modules:
     RichEnv.Filters
+    RichEnv.Setters
     RichEnv.Types
 
   -- LANGUAGE extensions used by modules in this package.
