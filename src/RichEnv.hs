@@ -1,52 +1,16 @@
-module RichEnv (clearEnvironment, richEnv, varMaps, varPrefixes, varValues, RichEnv, RichEnvItem, VarMap, VarPrefix, VarValue) where
+module RichEnv (clearEnvironment, richEnv, RichEnv, VarMap, VarPrefix, VarValue) where
 
 import Control.Monad (join)
 import Data.Bifunctor (bimap)
-import Data.Map (Map)
 import Data.Map qualified as M
 import Data.Set (Set)
-import Data.Set qualified as S
 import Data.Text (Text, pack, stripPrefix, unpack)
+import RichEnv.Filters (varMaps, varPrefixes, varValues)
+import RichEnv.Types (Environment, RichEnv, VarMap (..), VarPrefix (..), VarValue (..))
 import System.Environment (getEnvironment, setEnv, unsetEnv)
 
-type RichEnv = Set RichEnvItem
-type Environment = Map Text Text
-
-data RichEnvItem
-    = -- | Maps an environment variable name to a different one.
-      EnvVarNameMap VarMap
-    | -- | Sets an environment variable to a specific value.
-      EnvVarValue VarValue
-    | -- | Maps all environment variables with a certain prefix to a new set of environment variables with a different prefix.
-      EnvVarPrefix VarPrefix
-
--- | A mapping from one environment variable name to another.
-data VarMap = VarMap
-    { mapVarName :: Text
-    -- ^ The name of the output environment variable.
-    , mapVarFrom :: Text
-    -- ^ The name of the input environment variable.
-    }
-    deriving stock (Eq, Ord)
-
-data VarValue = VarValue
-    { valueName :: Text
-    -- ^ The name of the environment variable.
-    , valueValue :: Text
-    -- ^ The value of the environment variable.
-    }
-    deriving stock (Eq, Ord)
-
--- | A prefix to add to all environment variables.
-data VarPrefix = VarPrefix
-    { prefixName :: Text
-    -- ^ The prefix of the output environment. Can be empty or the same as @prefixFrom@.
-    , prefixFrom :: Text
-    -- ^ The prefix of the input environment.
-    }
-    deriving stock (Eq, Ord)
-
 {- | Clears all environment variables of the current process.
+
  >>> import System.Environment
  >>> clearEnvironment >> getEnvironment >>= pure . null
  True
@@ -70,31 +34,6 @@ richEnv re = do
     vms = varMaps re
     vvs = varValues re
     vps = varPrefixes re
-
-{- FILTERING TYPE VARIANTS -}
-
--- | Gets only the 'VarMap' items from a 'RichEnv'.
-varMaps :: RichEnv -> Set VarMap
-varMaps = S.foldr f S.empty
-  where
-    f (EnvVarNameMap vm) = S.insert vm
-    f _ = id
-
--- | Gets only the 'VarValue' items from a 'RichEnv'.
-varValues :: RichEnv -> Set VarValue
-varValues = S.foldr f S.empty
-  where
-    f (EnvVarValue vv) = S.insert vv
-    f _ = id
-
--- | Gets only the 'VarPrefix' items from a 'RichEnv'.
-varPrefixes :: RichEnv -> Set VarPrefix
-varPrefixes = S.foldr f S.empty
-  where
-    f (EnvVarPrefix vp) = S.insert vp
-    f _ = id
-
-{- END FILTERING TYPE VARIANTS -}
 
 -- | Takes all the 'VarValue's and sets them as environment variables.
 setVarValues :: Set VarValue -> IO ()
