@@ -31,7 +31,7 @@
               cabal-fmt.enable = true;
               cabal2nix.enable = true;
               convco.enable = true;
-              fourmolu.enable = true;
+              ormolu.enable = true;
               hlint.enable = true;
               hpack.enable = true;
               # hunspell.enable = true;
