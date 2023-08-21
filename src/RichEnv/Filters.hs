@@ -5,6 +5,7 @@ import Data.Set qualified as S
 import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
 
 -- | Gets only the 'VarMap' items from a 'RichEnv'.
+--
 -- >>> varValues S.empty == S.empty
 -- True
 -- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]
@@ -17,6 +18,7 @@ varMaps = S.foldr f S.empty
     f _ = id
 
 -- | Gets only the 'VarValue' items from a 'RichEnv'.
+--
 -- >>> varValues S.empty == S.empty
 -- True
 -- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]
@@ -29,6 +31,7 @@ varValues = S.foldr f S.empty
     f _ = id
 
 -- | Gets only the 'VarPrefix' items from a 'RichEnv'.
+--
 -- >>> varPrefixes S.empty == S.empty
 -- True
 -- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]

@@ -9,6 +9,7 @@ import RichEnv.Types (Environment, VarMap (..), VarPrefix (..), VarValue (..))
 import System.Environment (setEnv)
 
 -- | Takes all the 'VarValue's and sets them as environment variables.
+--
 -- >>> import System.Environment
 -- >>> value <- setVarValueEnv (MkVarValue "foo" "bar") >> getEnv "foo"
 -- >>> value == "bar"
