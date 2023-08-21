@@ -126,7 +126,7 @@ test-suite richenv-test
   import:             common-options
 
   -- Modules included in this executable, other than Main.
-  other-modules:      RichEnvSpec
+  -- other-modules:
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
@@ -143,8 +143,30 @@ test-suite richenv-test
   -- Test dependencies.
   build-depends:
     , base        ^>=4.16.4.0
+    , containers
     , hspec
     , QuickCheck
     , richenv
+
+  build-tool-depends: hspec-discover:hspec-discover
+
+test-suite richenv-test-internal
+  import:             common-options
+  other-modules:
+    RichEnv.Filters
+    RichEnv.FiltersSpec
+    RichEnv.Types
+    RichEnvSpec
+
+  -- other-extensions:
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     test src
+  main-is:            SpecInternal.hs
+  build-depends:
+    , base        ^>=4.16.4.0
+    , containers
+    , hspec
+    , QuickCheck
+    , text
 
   build-tool-depends: hspec-discover:hspec-discover

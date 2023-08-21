@@ -6,7 +6,7 @@ mkDerivation {
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [ base containers text ];
-  testHaskellDepends = [ base hspec QuickCheck ];
+  testHaskellDepends = [ base containers hspec QuickCheck text ];
   testToolDepends = [ hspec-discover ];
   homepage = "https://github.com/DavSanchez/richenv";
   description = "Rich environment variable setup for Haskell";

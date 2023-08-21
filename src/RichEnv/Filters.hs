@@ -2,9 +2,14 @@ module RichEnv.Filters (varMaps, varPrefixes, varValues) where
 
 import Data.Set (Set)
 import Data.Set qualified as S
-import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap, VarPrefix, VarValue)
+import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
 
 -- | Gets only the 'VarMap' items from a 'RichEnv'.
+-- >>> varValues S.empty == S.empty
+-- True
+-- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]
+-- >>> varValues richEnv == S.fromList [MkVarValue "foo" "bar"]
+-- True
 varMaps :: RichEnv -> Set VarMap
 varMaps = S.foldr f S.empty
   where
@@ -12,6 +17,11 @@ varMaps = S.foldr f S.empty
     f _ = id
 
 -- | Gets only the 'VarValue' items from a 'RichEnv'.
+-- >>> varValues S.empty == S.empty
+-- True
+-- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]
+-- >>> varValues richEnv == S.fromList [MkVarValue "foo" "bar"]
+-- True
 varValues :: RichEnv -> Set VarValue
 varValues = S.foldr f S.empty
   where
@@ -19,6 +29,11 @@ varValues = S.foldr f S.empty
     f _ = id
 
 -- | Gets only the 'VarPrefix' items from a 'RichEnv'.
+-- >>> varPrefixes S.empty == S.empty
+-- True
+-- >>> let richEnv = S.fromList [EnvVarValue (MkVarValue "foo" "bar"), EnvVarNameMap (MkVarMap "bar" "baz"), EnvVarPrefix (MkVarPrefix "qux" "quux")]
+-- >>> varPrefixes richEnv == S.fromList [MkVarPrefix "qux" "quux"]
+-- True
 varPrefixes :: RichEnv -> Set VarPrefix
 varPrefixes = S.foldr f S.empty
   where
