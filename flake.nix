@@ -48,6 +48,7 @@
               ghc
               cabal-install
               haskell-language-server
+              hspec-discover
             ];
           };
           # devenv = devenv.lib.mkShell {};
