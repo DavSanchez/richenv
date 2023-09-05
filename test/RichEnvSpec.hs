@@ -29,7 +29,7 @@ setTestEnv :: [(String, String)] -> IO ()
 setTestEnv = mapM_ (uncurry setEnv)
 
 testEnv :: [(String, String)] -> Expectation
-testEnv expected = getEnvironment >>= shouldBe (sort expected) . sort
+testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort
 
 -- Test cases
 
