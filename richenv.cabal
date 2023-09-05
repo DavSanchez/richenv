@@ -62,7 +62,10 @@ source-repository head
   location: https://github.com/DavSanchez/richenv.git
 
 common common-options
-  build-depends:      base >=4.14 && <5
+  build-depends:
+    , base  >=4.14 && <5
+    , text
+
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-uni-patterns
     -Wincomplete-record-updates -Wredundant-constraints
@@ -91,7 +94,10 @@ common common-options
 
   -- Base language which the package is written in.
   default-language:   Haskell2010
-  default-extensions: OverloadedStrings
+  default-extensions:
+    DerivingStrategies
+    ImportQualifiedPost
+    OverloadedStrings
 
 library
   -- Import common options.
@@ -107,31 +113,79 @@ library
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:   base ^>=4.16.4.0
+  build-depends:   richenv-internal
+
+  --   , base        ^>=4.16.4.0
+  --   , containers
+  --   , text
 
   -- Directories containing source files.
   hs-source-dirs:  src
 
+library richenv-internal
+  import:           common-options
+  exposed-modules:
+    RichEnv.Filters
+    RichEnv.Setters
+    RichEnv.Types
+
+  build-depends:
+    , hashable
+    , unordered-containers
+
+  hs-source-dirs:   internal
+  default-language: Haskell2010
+
 test-suite richenv-test
   -- Import common options.
-  import:         common-options
+  import:             common-options
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:
+    RichEnv.FiltersSpec
+    RichEnv.SettersSpec
+    RichEnvSpec
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- The interface type and version of the test suite.
-  type:           exitcode-stdio-1.0
+  type:               exitcode-stdio-1.0
 
   -- Directories containing source files.
-  hs-source-dirs: test
+  hs-source-dirs:     test
 
   -- The entrypoint to the test suite.
-  main-is:        Main.hs
+  main-is:            Spec.hs
 
   -- Test dependencies.
   build-depends:
-    , base     ^>=4.16.4.0
+    , hspec
+    , QuickCheck
     , richenv
+    , richenv-internal
+    , unordered-containers
+
+  -- , base        ^>=4.16.4.0
+  build-tool-depends: hspec-discover:hspec-discover
+
+-- test-suite richenv-test-internal
+--   import:             common-options
+--   other-modules:
+--     RichEnv.Filters
+--     RichEnv.FiltersSpec
+--     RichEnv.Types
+--     RichEnvSpec
+
+--   -- other-extensions:
+--   type:               exitcode-stdio-1.0
+--   hs-source-dirs:     test src
+--   main-is:            SpecInternal.hs
+--   build-depends:
+--     -- , base        ^>=4.16.4.0
+--     -- , containers
+--     -- , text
+--     , hspec
+--     , QuickCheck
+
+--   build-tool-depends: hspec-discover:hspec-discover

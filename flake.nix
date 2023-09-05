@@ -2,8 +2,11 @@
   description = "richenv - Rich environment variable setup for Haskell";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     devenv.url = "github:cachix/devenv";
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -28,7 +31,7 @@
               cabal-fmt.enable = true;
               cabal2nix.enable = true;
               convco.enable = true;
-              fourmolu.enable = true;
+              ormolu.enable = true;
               hlint.enable = true;
               hpack.enable = true;
               # hunspell.enable = true;
@@ -41,6 +44,12 @@
         devShells = {
           default = pkgs.mkShell {
             inherit (self.checks.${system}.pre-commit-check) shellHook;
+            buildInputs = with pkgs.haskellPackages; [
+              ghc
+              cabal-install
+              haskell-language-server
+              hspec-discover
+            ];
           };
           # devenv = devenv.lib.mkShell {};
         };
