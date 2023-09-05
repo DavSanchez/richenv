@@ -104,29 +104,46 @@ library
   exposed-modules: RichEnv
 
   -- Modules included in this library but not exported.
-  other-modules:
-    RichEnv.Filters
-    RichEnv.Setters
-    RichEnv.Types
+  -- other-modules:
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
   build-depends:
-    , base        ^>=4.16.4.0
-    , containers
+    , richenv-internal
     , text
+
+  --   , base        ^>=4.16.4.0
+  --   , containers
+  --   , text
 
   -- Directories containing source files.
   hs-source-dirs:  src
+
+library richenv-internal
+  import:           common-options
+  exposed-modules:
+    RichEnv.Filters
+    RichEnv.Setters
+    RichEnv.Types
+
+  build-depends:
+    , hashable
+    , text
+    , unordered-containers
+
+  hs-source-dirs:   internal
+  default-language: Haskell2010
 
 test-suite richenv-test
   -- Import common options.
   import:             common-options
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:
+    RichEnv.FiltersSpec
+    RichEnvSpec
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
@@ -142,31 +159,32 @@ test-suite richenv-test
 
   -- Test dependencies.
   build-depends:
-    , base        ^>=4.16.4.0
-    , containers
     , hspec
     , QuickCheck
     , richenv
+    , richenv-internal
+    , unordered-containers
 
+  -- , base        ^>=4.16.4.0
   build-tool-depends: hspec-discover:hspec-discover
 
-test-suite richenv-test-internal
-  import:             common-options
-  other-modules:
-    RichEnv.Filters
-    RichEnv.FiltersSpec
-    RichEnv.Types
-    RichEnvSpec
+-- test-suite richenv-test-internal
+--   import:             common-options
+--   other-modules:
+--     RichEnv.Filters
+--     RichEnv.FiltersSpec
+--     RichEnv.Types
+--     RichEnvSpec
 
-  -- other-extensions:
-  type:               exitcode-stdio-1.0
-  hs-source-dirs:     test src
-  main-is:            SpecInternal.hs
-  build-depends:
-    , base        ^>=4.16.4.0
-    , containers
-    , hspec
-    , QuickCheck
-    , text
+--   -- other-extensions:
+--   type:               exitcode-stdio-1.0
+--   hs-source-dirs:     test src
+--   main-is:            SpecInternal.hs
+--   build-depends:
+--     -- , base        ^>=4.16.4.0
+--     -- , containers
+--     -- , text
+--     , hspec
+--     , QuickCheck
 
-  build-tool-depends: hspec-discover:hspec-discover
+--   build-tool-depends: hspec-discover:hspec-discover
