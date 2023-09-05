@@ -24,11 +24,12 @@ richEnv :: RichEnv -> IO ()
 richEnv re = do
   currentEnv <- getEnvironment
   clearEnvironment currentEnv
-  mapM_ setVarValueEnv (vvs <> vms (texts currentEnv) <> vps (texts currentEnv))
+  mapM_ setVarValueEnv (newEnvSet currentEnv)
   where
     vvs = varValues re
     vms = flip setVarMapValues (varMaps re)
     vps = flip setPrefixedVars (varPrefixes re)
+    newEnvSet cEnv = vvs <> vms (texts cEnv) <> vps (texts cEnv)
 
 {- AUXILIARY FUNCTIONS -}
 

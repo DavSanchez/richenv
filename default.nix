@@ -9,7 +9,7 @@ mkDerivation {
     base hashable text unordered-containers
   ];
   testHaskellDepends = [
-    base hspec QuickCheck unordered-containers
+    base hspec QuickCheck text unordered-containers
   ];
   testToolDepends = [ hspec-discover ];
   doHaddock = false;

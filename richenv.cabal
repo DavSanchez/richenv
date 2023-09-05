@@ -62,7 +62,10 @@ source-repository head
   location: https://github.com/DavSanchez/richenv.git
 
 common common-options
-  build-depends:      base >=4.14 && <5
+  build-depends:
+    , base  >=4.14 && <5
+    , text
+
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-uni-patterns
     -Wincomplete-record-updates -Wredundant-constraints
@@ -110,9 +113,7 @@ library
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:
-    , richenv-internal
-    , text
+  build-depends:   richenv-internal
 
   --   , base        ^>=4.16.4.0
   --   , containers
@@ -130,7 +131,6 @@ library richenv-internal
 
   build-depends:
     , hashable
-    , text
     , unordered-containers
 
   hs-source-dirs:   internal
@@ -143,6 +143,7 @@ test-suite richenv-test
   -- Modules included in this executable, other than Main.
   other-modules:
     RichEnv.FiltersSpec
+    RichEnv.SettersSpec
     RichEnvSpec
 
   -- LANGUAGE extensions used by modules in this package.

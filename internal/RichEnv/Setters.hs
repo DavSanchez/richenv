@@ -21,8 +21,8 @@ import System.Environment (setEnv)
 -- True
 setVarValueEnv :: VarValue -> IO ()
 setVarValueEnv vv =
-  let name = valueName vv
-      value = valueValue vv
+  let name = vvName vv
+      value = vvValue vv
    in setEnv (unpack name) (unpack value)
 
 -- | Takes an environment list and all the 'VarMap's and prepares a valid @HashSet@ of 'VarValue's according to the RichEnv rules.
@@ -30,8 +30,8 @@ setVarMapValues :: Environment -> HashSet VarMap -> HashSet VarValue
 setVarMapValues cEnv = foldr setVarMapValue mempty
   where
     setVarMapValue vm = do
-      let name = mapVarName vm
-          from = mapVarFrom vm
+      let name = vmName vm
+          from = vmFrom vm
           value = lookup from cEnv
       case value of
         Just v -> S.insert (VarValue name v)
@@ -42,8 +42,8 @@ setPrefixedVars :: Environment -> HashSet VarPrefix -> HashSet VarValue
 setPrefixedVars cEnv = foldr setPrefixedVar mempty
   where
     setPrefixedVar vp = do
-      let newPrefix = prefixName vp
-          oldPrefix = prefixFrom vp
+      let newPrefix = vpName vp
+          oldPrefix = vpFrom vp
           vars = mapMaybe (getWithoutPrefix oldPrefix) cEnv
           newPrefixedVars = fmap (first (newPrefix <>)) vars
       S.union $ S.fromList $ fmap (uncurry VarValue) newPrefixedVars

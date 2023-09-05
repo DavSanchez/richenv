@@ -23,26 +23,26 @@ data RichEnvItem
 -- | A mapping from one environment variable name to another.
 data VarMap = VarMap
   { -- | The name of the output environment variable.
-    mapVarName :: Text,
+    vmName :: Text,
     -- | The name of the input environment variable.
-    mapVarFrom :: Text
+    vmFrom :: Text
   }
   deriving stock (Eq, Show, Generic)
 
 data VarValue = VarValue
   { -- | The name of the environment variable.
-    valueName :: Text,
+    vvName :: Text,
     -- | The value of the environment variable.
-    valueValue :: Text
+    vvValue :: Text
   }
   deriving stock (Eq, Show, Generic)
 
 -- | A prefix to add to all environment variables.
 data VarPrefix = VarPrefix
   { -- | The prefix of the output environment. Can be empty or the same as @prefixFrom@.
-    prefixName :: Text,
+    vpName :: Text,
     -- | The prefix of the input environment.
-    prefixFrom :: Text
+    vpFrom :: Text
   }
   deriving stock (Eq, Show, Generic)
 
