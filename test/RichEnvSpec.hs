@@ -53,13 +53,13 @@ exampleEnv :: [(String, String)]
 exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
 richEnvMapping :: RichEnv
-richEnvMapping = S.singleton (EnvVarNameMap (VarMap "SOME" "FOO"))
+richEnvMapping = S.singleton $ EnvVarNameMap (VarMap "SOME" "FOO")
 
 expectedMapped :: [(String, String)]
 expectedMapped = [("SOME", "bar")]
 
 richEnvPrefix :: RichEnv
-richEnvPrefix = S.singleton (EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_"))
+richEnvPrefix = S.singleton $ EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_")
 
 expectedNewPrefix :: [(String, String)]
 expectedNewPrefix = [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
