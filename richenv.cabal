@@ -125,6 +125,10 @@ library richenv-internal
     RichEnv.Filters
     RichEnv.Setters
     RichEnv.Types
+    RichEnv.Types.Instances.JSON
+    RichEnv.Types.Instances.YAML
+
+  -- RichEnv.Types.TOML
 
   build-depends:
     , aeson
