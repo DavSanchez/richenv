@@ -127,8 +127,12 @@ library richenv-internal
     RichEnv.Types
 
   build-depends:
+    , aeson
     , hashable
     , unordered-containers
+    , yaml
+
+  -- , toml-parser
 
   hs-source-dirs:   internal
   default-language: Haskell2010
