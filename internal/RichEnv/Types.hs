@@ -39,7 +39,7 @@ data VarValue = VarValue
 
 -- | A prefix to add to all environment variables.
 data VarPrefix = VarPrefix
-  { -- | The prefix of the output environment. Can be empty (representing 'all' or the wildcard '*') or even the same as @prefixFrom@ to act as a passthrough.
+  { -- | The prefix of the output environment. Can be empty (representing /all/ or the wildcard '*') or even the same as @prefixFrom@ to act as a passthrough.
     vpName :: Text,
     -- | The prefix of the input environment.
     vpFrom :: Text

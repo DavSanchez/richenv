@@ -14,6 +14,12 @@ spec = do
       setVarMapValues mempty mempty `shouldBe` mempty
     it "remaps a single environment variable" $ do
       setVarMapValues exampleEnv testVarMap `shouldBe` expectedVars
+    it "does not accept mapping from empty variable" $ do
+      setVarMapValues exampleEnv emptyVarMapFrom `shouldBe` mempty
+    it "does not accept empty names" $ do
+      setVarMapValues exampleEnv emptyVarMapName `shouldBe` mempty
+    it "does not accept empty names and empty variables" $ do
+      setVarMapValues exampleEnv emptyVarMap `shouldBe` mempty
   describe "varPrefixes" $ do
     it "returns an empty environment when given an empty set" $ do
       setPrefixedVars mempty mempty `shouldBe` mempty
@@ -33,6 +39,15 @@ exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PRE
 
 testVarMap :: HashSet VarMap
 testVarMap = S.singleton $ VarMap "SOME" "FOO"
+
+emptyVarMapFrom :: HashSet VarMap
+emptyVarMapFrom = S.singleton $ VarMap "SOME" ""
+
+emptyVarMapName :: HashSet VarMap
+emptyVarMapName = S.singleton $ VarMap "" "FOO"
+
+emptyVarMap :: HashSet VarMap
+emptyVarMap = S.singleton $ VarMap "" ""
 
 expectedVars :: HashSet VarValue
 expectedVars = S.singleton $ VarValue "SOME" "bar"
