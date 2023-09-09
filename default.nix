@@ -1,15 +1,13 @@
 { mkDerivation, base, hashable, hspec, hspec-discover, lib
-, QuickCheck, text, unordered-containers
+, QuickCheck, unordered-containers
 }:
 mkDerivation {
   pname = "richenv";
   version = "0.1.0.0";
   src = ./.;
-  libraryHaskellDepends = [
-    base hashable text unordered-containers
-  ];
+  libraryHaskellDepends = [ base hashable unordered-containers ];
   testHaskellDepends = [
-    base hspec QuickCheck text unordered-containers
+    base hspec QuickCheck unordered-containers
   ];
   testToolDepends = [ hspec-discover ];
   doHaddock = false;
