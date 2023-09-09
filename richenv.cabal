@@ -62,10 +62,7 @@ source-repository head
   location: https://github.com/DavSanchez/richenv.git
 
 common common-options
-  build-depends:
-    , base  >=4.14 && <5
-    , text
-
+  build-depends:      base >=4.14 && <5
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-uni-patterns
     -Wincomplete-record-updates -Wredundant-constraints
@@ -145,6 +142,7 @@ test-suite richenv-test
     RichEnv.FiltersSpec
     RichEnv.SettersSpec
     RichEnvSpec
+    Utils
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

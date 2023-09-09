@@ -2,10 +2,10 @@ module RichEnv.SettersSpec (spec) where
 
 import Data.HashSet (HashSet)
 import Data.HashSet qualified as S
-import Data.Text (Text)
 import RichEnv.Setters (setPrefixedVars, setVarMapValues)
-import RichEnv.Types (VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types (Environment, VarMap (..), VarPrefix (..), VarValue (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
+import Utils (nonEmptyVarMap, nonEmptyVarValue)
 
 spec :: Spec
 spec = do
@@ -14,12 +14,6 @@ spec = do
       setVarMapValues mempty mempty `shouldBe` mempty
     it "remaps a single environment variable" $ do
       setVarMapValues exampleEnv testVarMap `shouldBe` expectedVars
-    it "does not accept mapping from empty variable" $ do
-      setVarMapValues exampleEnv emptyVarMapFrom `shouldBe` mempty
-    it "does not accept empty names" $ do
-      setVarMapValues exampleEnv emptyVarMapName `shouldBe` mempty
-    it "does not accept empty names and empty variables" $ do
-      setVarMapValues exampleEnv emptyVarMap `shouldBe` mempty
   describe "varPrefixes" $ do
     it "returns an empty environment when given an empty set" $ do
       setPrefixedVars mempty mempty `shouldBe` mempty
@@ -34,50 +28,41 @@ spec = do
     it "passes all environment variables" $ do
       setPrefixedVars exampleEnv passAll `shouldBe` expectedAll
 
-exampleEnv :: [(Text, Text)]
+exampleEnv :: Environment
 exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
 testVarMap :: HashSet VarMap
-testVarMap = S.singleton $ VarMap "SOME" "FOO"
-
-emptyVarMapFrom :: HashSet VarMap
-emptyVarMapFrom = S.singleton $ VarMap "SOME" ""
-
-emptyVarMapName :: HashSet VarMap
-emptyVarMapName = S.singleton $ VarMap "" "FOO"
-
-emptyVarMap :: HashSet VarMap
-emptyVarMap = S.singleton $ VarMap "" ""
+testVarMap = S.singleton $ nonEmptyVarMap "SOME" "FOO"
 
 expectedVars :: HashSet VarValue
-expectedVars = S.singleton $ VarValue "SOME" "bar"
+expectedVars = S.singleton $ nonEmptyVarValue "SOME" "bar"
 
 testVarPrefix :: HashSet VarPrefix
 testVarPrefix = S.singleton $ VarPrefix "NEW_" "PREFIXED_"
 
 expectedPrefixedVars :: HashSet VarValue
-expectedPrefixedVars = S.fromList [VarValue "NEW_VAR" "content", VarValue "NEW_VAR2" "content2"]
+expectedPrefixedVars = S.fromList [nonEmptyVarValue "NEW_VAR" "content", nonEmptyVarValue "NEW_VAR2" "content2"]
 
 passAllAndAddPrefix :: HashSet VarPrefix
 passAllAndAddPrefix = S.singleton $ VarPrefix "NEWPREFIX_" ""
 
 expectedAllPrefixedVars :: HashSet VarValue
-expectedAllPrefixedVars = S.fromList [VarValue "NEWPREFIX_FOO" "bar", VarValue "NEWPREFIX_BAZ" "qux", VarValue "NEWPREFIX_PREFIXED_VAR" "content", VarValue "NEWPREFIX_PREFIXED_VAR2" "content2"]
+expectedAllPrefixedVars = S.fromList [nonEmptyVarValue "NEWPREFIX_FOO" "bar", nonEmptyVarValue "NEWPREFIX_BAZ" "qux", nonEmptyVarValue "NEWPREFIX_PREFIXED_VAR" "content", nonEmptyVarValue "NEWPREFIX_PREFIXED_VAR2" "content2"]
 
 passSomeAndRemovePrefix :: HashSet VarPrefix
 passSomeAndRemovePrefix = S.singleton $ VarPrefix "" "PREFIXED_"
 
 expectedSomePrefixedVars :: HashSet VarValue
-expectedSomePrefixedVars = S.fromList [VarValue "VAR" "content", VarValue "VAR2" "content2"]
+expectedSomePrefixedVars = S.fromList [nonEmptyVarValue "VAR" "content", nonEmptyVarValue "VAR2" "content2"]
 
 passOnlyPrefixedPreservingPrefix :: HashSet VarPrefix
 passOnlyPrefixedPreservingPrefix = S.singleton $ VarPrefix "PREFIXED_" "PREFIXED_"
 
 expectedOnlyPrefixedPreservingPrefix :: HashSet VarValue
-expectedOnlyPrefixedPreservingPrefix = S.fromList [VarValue "PREFIXED_VAR" "content", VarValue "PREFIXED_VAR2" "content2"]
+expectedOnlyPrefixedPreservingPrefix = S.fromList [nonEmptyVarValue "PREFIXED_VAR" "content", nonEmptyVarValue "PREFIXED_VAR2" "content2"]
 
 passAll :: HashSet VarPrefix
 passAll = S.singleton $ VarPrefix "" ""
 
 expectedAll :: HashSet VarValue
-expectedAll = S.fromList [VarValue "FOO" "bar", VarValue "BAZ" "qux", VarValue "PREFIXED_VAR" "content", VarValue "PREFIXED_VAR2" "content2"]
+expectedAll = S.fromList [nonEmptyVarValue "FOO" "bar", nonEmptyVarValue "BAZ" "qux", nonEmptyVarValue "PREFIXED_VAR" "content", nonEmptyVarValue "PREFIXED_VAR2" "content2"]

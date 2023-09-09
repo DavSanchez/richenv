@@ -1,12 +1,12 @@
-module RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv) where
+module RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment) where
 
 import Control.Monad (unless)
 import Data.Bifunctor (first)
 import Data.HashSet (HashSet)
 import Data.HashSet qualified as S
+import Data.List (stripPrefix)
+import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Maybe (mapMaybe)
-import Data.Text (stripPrefix, unpack)
-import Data.Text qualified as T
 import RichEnv.Types (Environment, VarMap (..), VarPrefix (..), VarValue (..))
 import System.Environment (setEnv)
 
@@ -29,18 +29,22 @@ import System.Environment (setEnv)
 -- True
 setVarValueEnv :: VarValue -> IO ()
 setVarValueEnv vv = do
-  let name = vvName vv
+  let name = toList $ vvName vv
       value = vvValue vv
-  unless (T.null name) $ setEnv (unpack name) (unpack value)
+  unless (null name) $ setEnv name value
+
+varValuesToEnvironment :: HashSet VarValue -> Environment
+varValuesToEnvironment = fmap toTuple . S.toList
+  where
+    toTuple vv = (toList (vvName vv), vvValue vv)
 
 -- | Takes an environment list and all the 'VarMap's and prepares a valid @HashSet@ of 'VarValue's according to the RichEnv rules.
 setVarMapValues :: Environment -> HashSet VarMap -> HashSet VarValue
 setVarMapValues cEnv = foldr setVarMapValue mempty
   where
-    setVarMapValue (VarMap "" _) = id
     setVarMapValue vm = do
       let name = vmName vm
-          from = vmFrom vm
+          from = toList $ vmFrom vm
           value = lookup from cEnv
       case value of
         Just v -> S.insert (VarValue name v)
@@ -55,5 +59,7 @@ setPrefixedVars cEnv = foldr setPrefixedVar mempty
           oldPrefix = vpFrom vp
           vars = mapMaybe (getWithoutPrefix oldPrefix) cEnv
           newPrefixedVars = fmap (first (newPrefix <>)) vars
-      S.union $ S.fromList $ fmap (uncurry VarValue) newPrefixedVars
+          nonEmptyVarNames (n, v) = nonEmpty n >>= \nn -> pure (nn, v)
+          withNonEmptyVarNames = mapMaybe nonEmptyVarNames newPrefixedVars
+      S.union $ S.fromList $ fmap (uncurry VarValue) withNonEmptyVarNames
     getWithoutPrefix old (k, v) = stripPrefix old k >>= \sk -> pure (sk, v)

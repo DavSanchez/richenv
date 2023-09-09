@@ -1,15 +1,17 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), Environment) where
+module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv, Environment) where
 
 import Data.HashSet (HashSet)
 import Data.Hashable (Hashable)
-import Data.Text (Text)
+import Data.List.NonEmpty (NonEmpty)
 import GHC.Generics (Generic)
 
 type RichEnv = HashSet RichEnvItem
 
-type Environment = [(Text, Text)]
+type Environment = [(String, String)]
+
+type NonEmptyString = NonEmpty Char
 
 data RichEnvItem
   = -- | Maps an environment variable name to a different one.
@@ -23,26 +25,26 @@ data RichEnvItem
 -- | A mapping from one environment variable name to another.
 data VarMap = VarMap
   { -- | The name of the output environment variable.
-    vmName :: Text,
+    vmName :: NonEmptyString,
     -- | The name of the input environment variable.
-    vmFrom :: Text
+    vmFrom :: NonEmptyString
   }
   deriving stock (Eq, Show, Generic)
 
 data VarValue = VarValue
   { -- | The name of the environment variable.
-    vvName :: Text,
+    vvName :: NonEmptyString,
     -- | The value of the environment variable.
-    vvValue :: Text
+    vvValue :: String
   }
   deriving stock (Eq, Show, Generic)
 
 -- | A prefix to add to all environment variables.
 data VarPrefix = VarPrefix
   { -- | The prefix of the output environment. Can be empty (representing /all/ or the wildcard '*') or even the same as @prefixFrom@ to act as a passthrough.
-    vpName :: Text,
+    vpName :: String,
     -- | The prefix of the input environment.
-    vpFrom :: Text
+    vpFrom :: String
   }
   deriving stock (Eq, Show, Generic)
 

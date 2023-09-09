@@ -1,12 +1,30 @@
-module RichEnv (clearEnvironment, richEnv, RichEnv, VarMap, VarPrefix, VarValue) where
+module RichEnv (clearEnvironment, toEnvList, setRichEnv, RichEnv, VarMap (..), VarPrefix (..), VarValue (..)) where
 
-import Control.Monad (join)
-import Data.Bifunctor (bimap)
-import Data.Text (Text, pack)
 import RichEnv.Filters (varMaps, varPrefixes, varValues)
-import RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv)
-import RichEnv.Types (RichEnv, VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment)
+import RichEnv.Types (Environment, RichEnv, VarMap (..), VarPrefix (..), VarValue (..))
 import System.Environment (getEnvironment, unsetEnv)
+
+-- | Returns a list of environment variables abiding to the 'RichEnv' rules.
+toEnvList :: RichEnv -> IO Environment
+toEnvList re = varValuesToEnvironment . newEnvSet <$> getEnvironment
+  where
+    vvs = varValues re
+    vms = flip setVarMapValues (varMaps re)
+    vps = flip setPrefixedVars (varPrefixes re)
+    newEnvSet cEnv = vvs <> vms cEnv <> vps cEnv
+
+-- | Sets the environment variables available to the current process abiding to the 'RichEnv' rules.
+setRichEnv :: RichEnv -> IO ()
+setRichEnv re = do
+  currentEnv <- getEnvironment
+  clearEnvironment currentEnv
+  mapM_ setVarValueEnv (newEnvSet currentEnv)
+  where
+    vvs = varValues re
+    vms = flip setVarMapValues (varMaps re)
+    vps = flip setPrefixedVars (varPrefixes re)
+    newEnvSet cEnv = vvs <> vms cEnv <> vps cEnv
 
 -- | Clears all environment variables of the current process.
 --
@@ -16,25 +34,5 @@ import System.Environment (getEnvironment, unsetEnv)
 -- >>> import System.Environment
 -- >>> (getEnvironment >>= clearEnvironment) >> setEnv "FOO" "bar" >> getEnvironment >>= \s -> pure (s == [("FOO", "bar")])
 -- True
-clearEnvironment :: [(String, String)] -> IO ()
+clearEnvironment :: Environment -> IO ()
 clearEnvironment = mapM_ (unsetEnv . fst)
-
--- | Sets the environment variables available to the current process abiding to the 'RichEnv' rules.
-richEnv :: RichEnv -> IO ()
-richEnv re = do
-  currentEnv <- getEnvironment
-  clearEnvironment currentEnv
-  mapM_ setVarValueEnv (newEnvSet currentEnv)
-  where
-    vvs = varValues re
-    vms = flip setVarMapValues (varMaps re)
-    vps = flip setPrefixedVars (varPrefixes re)
-    newEnvSet cEnv = vvs <> vms (texts cEnv) <> vps (texts cEnv)
-
-{- AUXILIARY FUNCTIONS -}
-
--- | Converts the '[(String, String)]@ returned by 'getEnvironment' into a @[(Text, Text)]@.
-texts :: [(String, String)] -> [(Text, Text)]
-texts = fmap $ join bimap pack
-
-{- END AUXILIARY FUNCTIONS -}
