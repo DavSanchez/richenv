@@ -29,10 +29,17 @@ setRichEnv re = do
 -- | Clears all environment variables of the current process.
 --
 -- >>> import System.Environment
--- >>> (getEnvironment >>= clearEnvironment) >> getEnvironment >>= pure . null
+-- >>> env <- getEnvironment
+-- >>> clearEnvironment env
+-- >>> env' <- getEnvironment
+-- >>> null env'
 -- True
 -- >>> import System.Environment
--- >>> (getEnvironment >>= clearEnvironment) >> setEnv "FOO" "bar" >> getEnvironment >>= \s -> pure (s == [("FOO", "bar")])
+-- >>> env <- getEnvironment
+-- >>> clearEnvironment env
+-- >>> setEnv "FOO" "bar"
+-- >>> env' <- getEnvironment
+-- >>> env' == [("FOO", "bar")]
 -- True
 clearEnvironment :: Environment -> IO ()
 clearEnvironment = mapM_ (unsetEnv . fst)
