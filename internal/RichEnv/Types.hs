@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv, Environment) where
+module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv, Environment, NonEmptyString) where
 
 import Data.HashSet (HashSet)
 import Data.Hashable (Hashable)
