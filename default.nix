@@ -1,12 +1,13 @@
-{ mkDerivation, aeson, base, bytestring, hashable, hspec
-, hspec-discover, lib, QuickCheck, unordered-containers, yaml
+{ mkDerivation, aeson, autodocodec, base, bytestring, hashable
+, hspec, hspec-discover, lib, QuickCheck, unordered-containers
+, yaml
 }:
 mkDerivation {
   pname = "richenv";
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [
-    aeson base hashable unordered-containers
+    aeson autodocodec base hashable unordered-containers
   ];
   testHaskellDepends = [
     base bytestring hspec QuickCheck unordered-containers yaml

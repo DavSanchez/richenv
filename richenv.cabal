@@ -130,6 +130,7 @@ library richenv-internal
 
   build-depends:
     , aeson
+    , autodocodec
     , hashable
     , unordered-containers
 
