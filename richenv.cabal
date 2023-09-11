@@ -125,8 +125,6 @@ library richenv-internal
     RichEnv.Filters
     RichEnv.Setters
     RichEnv.Types
-    RichEnv.Types.Instances.JSON
-    RichEnv.Types.Instances.YAML
 
   -- RichEnv.Types.TOML
 
@@ -134,7 +132,6 @@ library richenv-internal
     , aeson
     , hashable
     , unordered-containers
-    , yaml
 
   -- , toml-parser
 
@@ -166,11 +163,13 @@ test-suite richenv-test
 
   -- Test dependencies.
   build-depends:
+    , bytestring
     , hspec
     , QuickCheck
     , richenv
     , richenv-internal
     , unordered-containers
+    , yaml
 
   -- , base        ^>=4.16.4.0
   build-tool-depends: hspec-discover:hspec-discover
