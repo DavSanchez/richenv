@@ -8,8 +8,9 @@ import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), Va
 --
 -- >>> varValues S.empty == S.empty
 -- True
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue "foo" "bar"), EnvVarNameMap (VarMap "bar" "baz"), EnvVarPrefix (VarPrefix "qux" "quux")]
--- >>> varValues richEnv == S.fromList [VarValue "foo" "bar"]
+-- >>> import Data.List.NonEmpty (fromList)
+-- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varMaps :: RichEnv -> HashSet VarMap
 varMaps = S.foldr f S.empty
@@ -21,8 +22,9 @@ varMaps = S.foldr f S.empty
 --
 -- >>> varValues S.empty == S.empty
 -- True
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue "foo" "bar"), EnvVarNameMap (VarMap "bar" "baz"), EnvVarPrefix (VarPrefix "qux" "quux")]
--- >>> varValues richEnv == S.fromList [VarValue "foo" "bar"]
+-- >>> import Data.List.NonEmpty (fromList)
+-- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varValues :: RichEnv -> HashSet VarValue
 varValues = S.foldr f S.empty
@@ -34,7 +36,8 @@ varValues = S.foldr f S.empty
 --
 -- >>> varPrefixes S.empty == S.empty
 -- True
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue "foo" "bar"), EnvVarNameMap (VarMap "bar" "baz"), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> import Data.List.NonEmpty (fromList)
+-- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
 -- >>> varPrefixes richEnv == S.fromList [VarPrefix "qux" "quux"]
 -- True
 varPrefixes :: RichEnv -> HashSet VarPrefix

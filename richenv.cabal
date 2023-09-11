@@ -126,9 +126,15 @@ library richenv-internal
     RichEnv.Setters
     RichEnv.Types
 
+  -- RichEnv.Types.TOML
+
   build-depends:
+    , aeson
+    , autodocodec
     , hashable
     , unordered-containers
+
+  -- , toml-parser
 
   hs-source-dirs:   internal
   default-language: Haskell2010
@@ -158,11 +164,13 @@ test-suite richenv-test
 
   -- Test dependencies.
   build-depends:
+    , bytestring
     , hspec
     , QuickCheck
     , richenv
     , richenv-internal
     , unordered-containers
+    , yaml
 
   -- , base        ^>=4.16.4.0
   build-tool-depends: hspec-discover:hspec-discover

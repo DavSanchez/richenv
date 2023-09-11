@@ -1,44 +1,64 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module RichEnvSpec (spec) where
 
+import Data.ByteString qualified as B
+import Data.ByteString.Char8 qualified as C8
 import Data.HashSet qualified as S
 import Data.List (sort)
+import Data.Yaml (FromJSON, ParseException, decodeEither')
+import GHC.Generics (Generic)
 import RichEnv (clearEnvironment, setRichEnv, toEnvList)
 import RichEnv.Types (RichEnv, RichEnvItem (..), VarPrefix (..))
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, describe, it, shouldBe)
-import Test.QuickCheck ()
 import Utils (nonEmptyVarMap, nonEmptyVarValue)
 
 spec :: Spec
 spec = do
-  describe "RichEnv ops" $ do
+  describe "RichEnv ops: set environment" $ do
     it "set a single environment variable through RichEnv" $ do
       getEnvironment >>= clearEnvironment
-      setRichEnv richEnv1
-      testEnv expectedEnv1
+      setRichEnv $ S.singleton (EnvVarValue (nonEmptyVarValue "SOME" "var"))
+      testEnv [("SOME", "var")]
     it "set multiple environment variables through RichEnv" $ do
       getEnvironment >>= clearEnvironment
-      setRichEnv richEnv2
-      testEnv expectedEnv2
+      setRichEnv $ S.fromList [EnvVarValue (nonEmptyVarValue "SOME" "var"), EnvVarValue (nonEmptyVarValue "OTHER" "othervar")]
+      testEnv [("SOME", "var"), ("OTHER", "othervar")]
     it "remaps existing environment variables" $ do
       getEnvironment >>= clearEnvironment
       setTestEnv exampleEnv
-      setRichEnv richEnvMapping
-      testEnv expectedMapped
+      setRichEnv $ S.singleton $ EnvVarNameMap (nonEmptyVarMap "SOME" "FOO")
+      testEnv [("SOME", "bar")]
     it "remaps prefixed variables" $ do
       getEnvironment >>= clearEnvironment
       setTestEnv exampleEnv
-      setRichEnv richEnvPrefix
-      testEnv expectedNewPrefix
-  describe "getting the environment variable list" $ do
+      setRichEnv $ S.singleton $ EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_")
+      testEnv [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
+  describe "RichEnv ops: getting the environment variable list" $ do
     it "gets the environment variable list" $ do
       getEnvironment >>= clearEnvironment
       setTestEnv exampleEnv
-      testEnvList richEnvMapping expectedMapped
+      testEnvList
+        [("SOME", "bar")]
+        (S.singleton $ EnvVarNameMap (nonEmptyVarMap "SOME" "FOO"))
     it "gets the environment variable list with prefixes" $ do
       getEnvironment >>= clearEnvironment
       setTestEnv exampleEnv
-      testEnvList richEnvPrefix expectedNewPrefix
+      testEnvList
+        [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
+        (S.singleton $ EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_"))
+  describe "RichEnv ops: From YAML" $ do
+    it "parses a YAML file into expected results" $ do
+      getEnvironment >>= clearEnvironment
+      setTestEnv yamlBaseEnv
+      let res = decodeEither' yamlTestCase :: Either ParseException YamlTest
+      case res of
+        Left err -> fail $ show err
+        Right actual -> testEnvList yamlTestCaseExpected (env actual)
+  where
+    exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
 setTestEnv :: [(String, String)] -> IO ()
 setTestEnv = mapM_ (uncurry setEnv)
@@ -46,34 +66,38 @@ setTestEnv = mapM_ (uncurry setEnv)
 testEnv :: [(String, String)] -> Expectation
 testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort
 
-testEnvList :: RichEnv -> [(String, String)] -> Expectation
-testEnvList re expected = toEnvList re >>= (`shouldBe` sort expected) . sort
+testEnvList :: [(String, String)] -> RichEnv -> Expectation
+testEnvList expected re = toEnvList re >>= (`shouldBe` sort expected) . sort
 
--- Test cases
+-- YAML test cases that use the JSON conversion instances from Aeson
 
-richEnv1 :: RichEnv
-richEnv1 = S.singleton (EnvVarValue (nonEmptyVarValue "SOME" "var"))
+newtype YamlTest = YamlTest {env :: RichEnv}
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON)
 
-expectedEnv1 :: [(String, String)]
-expectedEnv1 = [("SOME", "var")]
+yamlTestCase :: B.ByteString
+yamlTestCase =
+  C8.pack $
+    unlines
+      [ "env:",
+        "  - name: SOME", -- This is the same as `EnvVarValue (VarValue "SOME" "var")`
+        "    value: somevar",
+        "  - name: OTHER", -- This is the same as `EnvVarValue (VarValue "OTHER" "othervar")`
+        "    value: othervar",
+        "  - name: FOO", -- This is the same as `EnvVarNameMap (VarMap "SOME" "FOO")`
+        "    from: SOME",
+        "  - name: NEW_*", -- This is the same as `EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_")`
+        "    from: PREFIXED_*"
+      ]
 
-richEnv2 :: RichEnv
-richEnv2 = S.fromList [EnvVarValue (nonEmptyVarValue "SOME" "var"), EnvVarValue (nonEmptyVarValue "OTHER" "othervar")]
+yamlBaseEnv :: [(String, String)]
+yamlBaseEnv = [("SOME", "bar"), ("OTHER", "othervar"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
-expectedEnv2 :: [(String, String)]
-expectedEnv2 = [("SOME", "var"), ("OTHER", "othervar")]
-
-exampleEnv :: [(String, String)]
-exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
-
-richEnvMapping :: RichEnv
-richEnvMapping = S.singleton $ EnvVarNameMap (nonEmptyVarMap "SOME" "FOO")
-
-expectedMapped :: [(String, String)]
-expectedMapped = [("SOME", "bar")]
-
-richEnvPrefix :: RichEnv
-richEnvPrefix = S.singleton $ EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_")
-
-expectedNewPrefix :: [(String, String)]
-expectedNewPrefix = [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
+yamlTestCaseExpected :: [(String, String)]
+yamlTestCaseExpected =
+  [ ("FOO", "bar"),
+    ("OTHER", "othervar"),
+    ("SOME", "somevar"),
+    ("NEW_VAR", "content"),
+    ("NEW_VAR2", "content2")
+  ]

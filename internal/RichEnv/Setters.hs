@@ -13,19 +13,15 @@ import System.Environment (setEnv)
 -- | Takes 'VarValue's and sets them as environment variables. It is a no-op if the variable name is empty.
 --
 -- >>> import System.Environment
--- >>> value <- setVarValueEnv (VarValue "foo" "bar") >> getEnv "foo"
+-- >>> import Data.List.NonEmpty (fromList)
+-- >>> value <- setVarValueEnv (VarValue (fromList "foo") "bar") >> getEnv "foo"
 -- >>> value == "bar"
 -- True
 -- >>> import System.Environment
+-- >>> import Data.List.NonEmpty (fromList)
 -- >>> getEnvironment >>= mapM_ (unsetEnv . fst)
--- >>> value <- setVarValueEnv (VarValue "foo" "bar") >> getEnv "foo"
+-- >>> value <- setVarValueEnv (VarValue (fromList "foo") "bar") >> getEnv "foo"
 -- >>> value == "bar"
--- True
--- >>> import System.Environment
--- >>> env <- getEnvironment
--- >>> setVarValueEnv (VarValue "" "bar")
--- >>> newEnv <- getEnvironment
--- >>> env == newEnv
 -- True
 setVarValueEnv :: VarValue -> IO ()
 setVarValueEnv vv = do
