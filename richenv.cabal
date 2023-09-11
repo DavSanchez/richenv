@@ -165,12 +165,12 @@ test-suite richenv-test
   build-depends:
     , bytestring
     , hspec
-    , QuickCheck
     , richenv
     , richenv-internal
     , unordered-containers
     , yaml
 
+  -- , QuickCheck
   -- , base        ^>=4.16.4.0
   build-tool-depends: hspec-discover:hspec-discover
 

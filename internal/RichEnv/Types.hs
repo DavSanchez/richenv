@@ -4,11 +4,11 @@
 
 module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv, Environment, NonEmptyString) where
 
-import Data.Aeson (Encoding, FromJSON, ToJSON (..), Value, withObject, (.:), (.:?))
+import Data.Aeson (Encoding, FromJSON, Object, ToJSON (..), Value, withObject, (.:), (.:?))
 import Data.Aeson.Types (FromJSON (..), Parser)
 import Data.HashSet (HashSet)
 import Data.Hashable (Hashable)
-import Data.List.NonEmpty (NonEmpty, fromList)
+import Data.List.NonEmpty (NonEmpty, fromList, nonEmpty, toList)
 import GHC.Generics (Generic)
 
 type RichEnv = HashSet RichEnvItem
@@ -30,23 +30,25 @@ data RichEnvItem
 instance FromJSON RichEnvItem where
   parseJSON :: Value -> Parser RichEnvItem
   parseJSON = withObject "RichEnvItem" $ \o -> do
-    name <- o .: "name"
+    n <- getName o
     from <- o .:? "from"
     value <- o .:? "value"
-    case (name, from, value) of
-      (Just n, Nothing, Just v) -> pure $ EnvVarValue $ VarValue (fromList n) v
-      (Just n, Just f, Nothing) -> do
-        if '*' `notElem` n && '*' `notElem` f
-          then pure $ EnvVarNameMap $ VarMap (fromList n) (fromList f)
-          else do
-            let n' = init n
-                f' = init f
-            if '*' `notElem` n' && '*' `notElem` f'
-              then pure $ EnvVarPrefix $ VarPrefix n' f'
-              else fail "VarMap `name` and `from` must end with a `*` and not contain `*` anywhere else."
-      (Nothing, _, _) -> fail "RichEnvItem must have field `name`"
-      (_, Nothing, Nothing) -> fail "RichEnvItem must have field `name` and at least one of `from` or `value`"
-      _ -> fail "RichEnvItem must have only one of `from` or `value`"
+    case (from, value) of
+      (Nothing, Just v) -> pure $ EnvVarValue $ VarValue n v
+      (Just f, Nothing)
+        | '*' `notElem` n && '*' `notElem` f ->
+            pure $ EnvVarNameMap $ VarMap n (fromList f)
+      (Just f, Nothing)
+        | '*' `notElem` init (toList n) && '*' `notElem` init f ->
+            pure $ EnvVarPrefix $ VarPrefix ((init . toList) n) (init f)
+      (Just _, Nothing) -> fail "VarMap `name` and `from` must end with a `*` and not contain `*` anywhere else."
+      (Nothing, Nothing) -> fail "RichEnvItem must have at least one of `from` or `value`"
+      (Just _, Just _) -> fail "RichEnvItem must have only one of `from` or `value`"
+    where
+      getName :: Object -> Parser NonEmptyString
+      getName o = do
+        name <- nonEmpty <$> o .: "name"
+        maybe (fail "VarMap must have field `name`") pure name
 
 instance ToJSON RichEnvItem where
   toJSON :: RichEnvItem -> Value
