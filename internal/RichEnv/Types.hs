@@ -9,6 +9,7 @@ import Data.Aeson.Types (FromJSON (..), Parser)
 import Data.HashSet (HashSet)
 import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty, fromList, nonEmpty, toList)
+import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 
 type RichEnv = HashSet RichEnvItem
@@ -35,12 +36,8 @@ instance FromJSON RichEnvItem where
     value <- o .:? "value"
     case (from, value) of
       (Nothing, Just v) -> pure $ EnvVarValue $ VarValue n v
-      (Just f, Nothing)
-        | '*' `notElem` n && '*' `notElem` f ->
-            pure $ EnvVarNameMap $ VarMap n (fromList f)
-      (Just f, Nothing)
-        | '*' `notElem` init (toList n) && '*' `notElem` init f ->
-            pure $ EnvVarPrefix $ VarPrefix ((init . toList) n) (init f)
+      (Just f, Nothing) | '*' `notElem` n && '*' `notElem` f -> pure $ EnvVarNameMap $ VarMap n (fromList f)
+      (Just f, Nothing) | '*' `notElem` NE.init n && '*' `notElem` init f -> pure $ EnvVarPrefix $ VarPrefix ((init . toList) n) (init f)
       (Just _, Nothing) -> fail "VarMap `name` and `from` must end with a `*` and not contain `*` anywhere else."
       (Nothing, Nothing) -> fail "RichEnvItem must have at least one of `from` or `value`"
       (Just _, Just _) -> fail "RichEnvItem must have only one of `from` or `value`"
