@@ -13,7 +13,6 @@ import RichEnv (clearEnvironment, setRichEnv, toEnvList)
 import RichEnv.Types (RichEnv, RichEnvItem (..), VarPrefix (..))
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, describe, it, shouldBe)
-import Test.QuickCheck ()
 import Utils (nonEmptyVarMap, nonEmptyVarValue)
 
 spec :: Spec
