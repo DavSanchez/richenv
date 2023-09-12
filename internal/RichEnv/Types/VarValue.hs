@@ -4,12 +4,14 @@
 
 module RichEnv.Types.VarValue (VarValue (..)) where
 
+import Control.Exception (Exception (displayException))
 import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON), Value, object, pairs, withObject, (.:), (.=))
 import Data.Aeson.Types (Parser)
 import Data.Hashable (Hashable)
 import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 import RichEnv.Types (NonEmptyString)
+import RichEnv.Types.ParseError (RichEnvParseError (..))
 
 data VarValue = VarValue
   { -- | The name of the environment variable.
@@ -27,7 +29,7 @@ instance FromJSON VarValue where
     value <- o .: "value"
     case nameM of
       Just name -> pure $ VarValue name value
-      _ -> fail "VarValue must have field `name`"
+      _ -> fail $ displayException VarValueNoName
 
 instance ToJSON VarValue where
   toJSON :: VarValue -> Value

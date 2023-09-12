@@ -4,6 +4,7 @@
 
 module RichEnv.Types.VarPrefix (VarPrefix (..)) where
 
+import Control.Exception (Exception (..))
 import Control.Monad (when)
 import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toJSON), Value, object, pairs, withObject, (.:), (.=))
 import Data.Aeson.Types (Parser, ToJSON (toEncoding))
@@ -11,6 +12,7 @@ import Data.Hashable (Hashable)
 import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 import RichEnv.Types (NonEmptyString)
+import RichEnv.Types.ParseError (RichEnvParseError (..))
 
 -- | A prefix to add to all environment variables.
 data VarPrefix = VarPrefix
@@ -31,9 +33,9 @@ instance FromJSON VarPrefix where
     -- and they should be at the end.
     case (name, from) of
       (Just name', Just from') -> do
-        when (checkWildcard name' || checkWildcard from') $ fail "VarPrefix `name` and `from` must end with a `*` and not contain `*` anywhere else."
+        when (checkWildcard name' || checkWildcard from') $ fail $ displayException VarPrefixInvalidWildcards
         pure $ VarPrefix ((init . NE.toList) name') ((init . NE.toList) from')
-      _ -> fail "VarPrefix must have fields `name` and `from`"
+      _ -> fail $ displayException VarPrefixMissingFields
 
 instance ToJSON VarPrefix where
   toJSON :: VarPrefix -> Value

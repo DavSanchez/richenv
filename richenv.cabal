@@ -125,6 +125,7 @@ library richenv-internal
     RichEnv.Filters
     RichEnv.Setters
     RichEnv.Types
+    RichEnv.Types.ParseError
     RichEnv.Types.RichEnv
     RichEnv.Types.VarMap
     RichEnv.Types.VarPrefix

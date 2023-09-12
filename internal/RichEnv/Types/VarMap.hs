@@ -4,6 +4,7 @@
 
 module RichEnv.Types.VarMap (VarMap (..)) where
 
+import Control.Exception (Exception (displayException))
 import Control.Monad (when)
 import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON), Value, object, pairs, withObject, (.:), (.=))
 import Data.Aeson.Types (Parser)
@@ -11,6 +12,7 @@ import Data.Hashable (Hashable)
 import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 import RichEnv.Types (NonEmptyString)
+import RichEnv.Types.ParseError (RichEnvParseError (..))
 
 -- | A mapping from one environment variable name to another.
 data VarMap = VarMap
@@ -29,9 +31,9 @@ instance FromJSON VarMap where
     fromM <- NE.nonEmpty <$> o .: "from"
     case (nameM, fromM) of
       (Just name, Just from) -> do
-        when ('*' `elem` name || '*' `elem` from) $ fail "VarMap `name` or `from` cannot contain `*`"
+        when ('*' `elem` name || '*' `elem` from) $ fail $ displayException VarMapWildcards
         pure $ VarMap name from
-      _ -> fail "VarMap must have fields `name` and `from`"
+      _ -> fail $ displayException VarMapMissingFields
 
 instance ToJSON VarMap where
   toJSON :: VarMap -> Value
