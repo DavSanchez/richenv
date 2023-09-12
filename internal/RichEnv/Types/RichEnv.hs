@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
 
-module RichEnv.Types.RichEnv where
+module RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..)) where
 
 import Control.Applicative ((<|>))
 import Control.Monad ((>=>))
