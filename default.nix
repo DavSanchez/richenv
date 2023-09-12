@@ -1,5 +1,5 @@
 { mkDerivation, aeson, base, bytestring, hashable, hspec
-, hspec-discover, lib, unordered-containers, yaml
+, hspec-discover, lib, QuickCheck, unordered-containers, yaml
 }:
 mkDerivation {
   pname = "richenv";
@@ -9,7 +9,8 @@ mkDerivation {
     aeson base hashable unordered-containers
   ];
   testHaskellDepends = [
-    base bytestring hspec unordered-containers yaml
+    aeson base bytestring hashable hspec QuickCheck
+    unordered-containers yaml
   ];
   testToolDepends = [ hspec-discover ];
   doHaddock = false;

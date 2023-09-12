@@ -1,8 +1,9 @@
 module RichEnv.Filters (varMaps, varPrefixes, varValues) where
 
+import Control.Arrow ((>>>))
 import Data.HashSet (HashSet)
 import Data.HashSet qualified as S
-import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
 
 -- | Gets only the 'VarMap' items from a 'RichEnv'.
 --
@@ -13,7 +14,7 @@ import RichEnv.Types (RichEnv, RichEnvItem (..), VarMap (..), VarPrefix (..), Va
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varMaps :: RichEnv -> HashSet VarMap
-varMaps = S.foldr f S.empty
+varMaps = richEnv >>> S.foldr f S.empty
   where
     f (EnvVarNameMap vm) = S.insert vm
     f _ = id
@@ -27,7 +28,7 @@ varMaps = S.foldr f S.empty
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varValues :: RichEnv -> HashSet VarValue
-varValues = S.foldr f S.empty
+varValues = richEnv >>> S.foldr f S.empty
   where
     f (EnvVarValue vv) = S.insert vv
     f _ = id
@@ -41,7 +42,7 @@ varValues = S.foldr f S.empty
 -- >>> varPrefixes richEnv == S.fromList [VarPrefix "qux" "quux"]
 -- True
 varPrefixes :: RichEnv -> HashSet VarPrefix
-varPrefixes = S.foldr f S.empty
+varPrefixes = richEnv >>> S.foldr f S.empty
   where
     f (EnvVarPrefix vp) = S.insert vp
     f _ = id

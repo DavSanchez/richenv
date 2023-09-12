@@ -147,6 +147,7 @@ test-suite richenv-test
     RichEnv.FiltersSpec
     RichEnv.SettersSpec
     RichEnvSpec
+    SpecHook
     Utils
 
   -- LANGUAGE extensions used by modules in this package.
@@ -163,8 +164,11 @@ test-suite richenv-test
 
   -- Test dependencies.
   build-depends:
+    , aeson
     , bytestring
+    , hashable
     , hspec
+    , QuickCheck
     , richenv
     , richenv-internal
     , unordered-containers

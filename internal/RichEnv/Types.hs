@@ -2,21 +2,43 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
 
-module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv, Environment, NonEmptyString) where
+module RichEnv.Types (RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..), RichEnv (..), Environment, NonEmptyString) where
 
-import Data.Aeson (Encoding, FromJSON, Object, ToJSON (..), Value, withObject, (.:), (.:?))
-import Data.Aeson.Types (FromJSON (..), Parser)
-import Data.HashSet (HashSet)
+import Control.Applicative ((<|>))
+import Control.Monad (when, (>=>))
+import Data.Aeson (Encoding, FromJSON (..), ToJSON (..), Value (..), object, pairs, withObject, (.:), (.=))
+import Data.Aeson.Types (Parser)
+import Data.HashSet qualified as S
 import Data.Hashable (Hashable)
-import Data.List.NonEmpty (NonEmpty, fromList, nonEmpty, toList)
 import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 
-type RichEnv = HashSet RichEnvItem
+newtype RichEnv = RichEnv {richEnv :: S.HashSet RichEnvItem}
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (Hashable)
+
+instance Semigroup RichEnv where
+  (<>) :: RichEnv -> RichEnv -> RichEnv
+  (<>) (RichEnv a) (RichEnv b) = RichEnv $ a <> b
+
+instance Monoid RichEnv where
+  mempty :: RichEnv
+  mempty = RichEnv mempty
+
+instance FromJSON RichEnv where
+  parseJSON :: Value -> Parser RichEnv
+  parseJSON = parseJSON >=> pure . RichEnv
+
+instance ToJSON RichEnv where
+  toJSON :: RichEnv -> Value
+  toJSON (RichEnv env) = toJSON env
+
+  toEncoding :: RichEnv -> Encoding
+  toEncoding (RichEnv env) = toEncoding env
 
 type Environment = [(String, String)]
 
-type NonEmptyString = NonEmpty Char
+type NonEmptyString = NE.NonEmpty Char
 
 data RichEnvItem
   = -- | Maps an environment variable name to a different one.
@@ -30,22 +52,11 @@ data RichEnvItem
 
 instance FromJSON RichEnvItem where
   parseJSON :: Value -> Parser RichEnvItem
-  parseJSON = withObject "RichEnvItem" $ \o -> do
-    n <- getName o
-    from <- o .:? "from"
-    value <- o .:? "value"
-    case (from, value) of
-      (Nothing, Just v) -> pure $ EnvVarValue $ VarValue n v
-      (Just f, Nothing) | '*' `notElem` n && '*' `notElem` f -> pure $ EnvVarNameMap $ VarMap n (fromList f)
-      (Just f, Nothing) | '*' `notElem` NE.init n && '*' `notElem` init f -> pure $ EnvVarPrefix $ VarPrefix ((init . toList) n) (init f)
-      (Just _, Nothing) -> fail "VarMap `name` and `from` must end with a `*` and not contain `*` anywhere else."
-      (Nothing, Nothing) -> fail "RichEnvItem must have at least one of `from` or `value`"
-      (Just _, Just _) -> fail "RichEnvItem must have only one of `from` or `value`"
-    where
-      getName :: Object -> Parser NonEmptyString
-      getName o = do
-        name <- nonEmpty <$> o .: "name"
-        maybe (fail "VarMap must have field `name`") pure name
+  parseJSON v = do
+    let parseEnvVarNameMap = EnvVarNameMap <$> parseJSON v
+        parseEnvVarValue = EnvVarValue <$> parseJSON v
+        parseEnvVarPrefix = EnvVarPrefix <$> parseJSON v
+    parseEnvVarNameMap <|> parseEnvVarValue <|> parseEnvVarPrefix
 
 instance ToJSON RichEnvItem where
   toJSON :: RichEnvItem -> Value
@@ -66,7 +77,25 @@ data VarMap = VarMap
     vmFrom :: NonEmptyString
   }
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable, ToJSON)
+  deriving anyclass (Hashable)
+
+instance FromJSON VarMap where
+  parseJSON :: Value -> Parser VarMap
+  parseJSON = withObject "VarMap" $ \o -> do
+    nameM <- NE.nonEmpty <$> o .: "name"
+    fromM <- NE.nonEmpty <$> o .: "from"
+    case (nameM, fromM) of
+      (Just name, Just from) -> do
+        when ('*' `elem` name || '*' `elem` from) $ fail "VarMap `name` or `from` cannot contain `*`"
+        pure $ VarMap name from
+      _ -> fail "VarMap must have fields `name` and `from`"
+
+instance ToJSON VarMap where
+  toJSON :: VarMap -> Value
+  toJSON (VarMap n f) = object ["name" .= NE.toList n, "from" .= NE.toList f]
+
+  toEncoding :: VarMap -> Encoding
+  toEncoding (VarMap n f) = pairs ("name" .= NE.toList n <> "from" .= NE.toList f)
 
 data VarValue = VarValue
   { -- | The name of the environment variable.
@@ -75,7 +104,23 @@ data VarValue = VarValue
     vvValue :: String
   }
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable, ToJSON)
+  deriving anyclass (Hashable)
+
+instance FromJSON VarValue where
+  parseJSON :: Value -> Parser VarValue
+  parseJSON = withObject "VarValue" $ \o -> do
+    nameM <- NE.nonEmpty <$> o .: "name"
+    value <- o .: "value"
+    case nameM of
+      Just name -> pure $ VarValue name value
+      _ -> fail "VarValue must have field `name`"
+
+instance ToJSON VarValue where
+  toJSON :: VarValue -> Value
+  toJSON (VarValue n v) = object ["name" .= NE.toList n, "value" .= v]
+
+  toEncoding :: VarValue -> Encoding
+  toEncoding (VarValue n v) = pairs ("name" .= NE.toList n <> "value" .= v)
 
 -- | A prefix to add to all environment variables.
 data VarPrefix = VarPrefix
@@ -85,4 +130,27 @@ data VarPrefix = VarPrefix
     vpFrom :: String
   }
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable, ToJSON)
+  deriving anyclass (Hashable)
+
+instance FromJSON VarPrefix where
+  parseJSON :: Value -> Parser VarPrefix
+  parseJSON = withObject "VarPrefix" $ \o -> do
+    name <- NE.nonEmpty <$> o .: "name"
+    from <- NE.nonEmpty <$> o .: "from"
+    -- Prefixes should have only one wildcard in each of the fields,
+    -- and they should be at the end.
+    case (name, from) of
+      (Just name', Just from') -> do
+        when (checkWildcard name' || checkWildcard from') $ fail "VarPrefix `name` and `from` must end with a `*` and not contain `*` anywhere else."
+        pure $ VarPrefix ((init . NE.toList) name') ((init . NE.toList) from')
+      _ -> fail "VarPrefix must have fields `name` and `from`"
+
+instance ToJSON VarPrefix where
+  toJSON :: VarPrefix -> Value
+  toJSON (VarPrefix n f) = object ["name" .= (n <> "*"), "from" .= (f <> "*")]
+
+  toEncoding :: VarPrefix -> Encoding
+  toEncoding (VarPrefix n f) = pairs ("name" .= (n <> "*") <> "from" .= (f <> "*"))
+
+checkWildcard :: NonEmptyString -> Bool
+checkWildcard = elem '*' . NE.init
