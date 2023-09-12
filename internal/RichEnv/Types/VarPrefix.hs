@@ -5,7 +5,7 @@
 module RichEnv.Types.VarPrefix (VarPrefix (vpName, vpFrom), mkVarPrefix) where
 
 import Control.Exception (Exception (..))
-import Control.Monad (join, when)
+import Control.Monad (when)
 import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toJSON), Value, object, pairs, withObject, (.:), (.=))
 import Data.Aeson.Types (Parser, ToJSON (toEncoding))
 import Data.Hashable (Hashable)
