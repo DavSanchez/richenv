@@ -154,7 +154,6 @@ test-suite richenv-test
     RichEnv.SettersSpec
     RichEnvSpec
     SpecHook
-    Utils
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

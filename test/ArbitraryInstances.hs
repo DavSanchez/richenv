@@ -7,11 +7,13 @@ import Data.HashSet qualified as S
 import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified as NE
+import Data.Maybe (fromJust, fromMaybe)
+import RichEnv.Types (NoWildcardNonEmptyString, NoWildcardString, UnwrapString (unwrapString), mkNoWildcardNonEmptyString, mkNoWildcardString)
 import RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..))
-import RichEnv.Types.VarMap (VarMap (..))
-import RichEnv.Types.VarPrefix (VarPrefix (..))
-import RichEnv.Types.VarValue (VarValue (..))
-import Test.QuickCheck (Arbitrary (arbitrary), Gen, oneof)
+import RichEnv.Types.VarMap (VarMap (..), mkVarMap)
+import RichEnv.Types.VarPrefix (VarPrefix (..), mkVarPrefix)
+import RichEnv.Types.VarValue (VarValue (..), mkVarValue)
+import Test.QuickCheck (Arbitrary (arbitrary), Gen, elements, listOf, oneof)
 
 instance Arbitrary RichEnv where
   arbitrary :: Gen RichEnv
@@ -28,22 +30,23 @@ instance Arbitrary RichEnvItem where
 instance Arbitrary VarPrefix where
   arbitrary :: Gen VarPrefix
   arbitrary = do
-    name <- NE.filter ('*' /=) <$> arbitrary
-    from <- NE.filter ('*' /=) <$> arbitrary
-    pure $ VarPrefix name from
+    pn <- unwrapString <$> (arbitrary :: Gen NoWildcardString)
+    pf <- unwrapString <$> (arbitrary :: Gen NoWildcardString)
+    pure $ fromJust (mkVarPrefix pn pf)
 
 instance Arbitrary VarMap where
   arbitrary :: Gen VarMap
   arbitrary = do
-    name <- ('m' :|) . NE.filter ('*' /=) <$> arbitrary
-    from <- ('m' :|) . NE.filter ('*' /=) <$> arbitrary
-    pure $ VarMap name from
+    mn <- unwrapString <$> (arbitrary :: Gen NoWildcardNonEmptyString)
+    mf <- unwrapString <$> (arbitrary :: Gen NoWildcardNonEmptyString)
+    pure $ fromJust (mkVarMap mn mf)
 
 instance Arbitrary VarValue where
   arbitrary :: Gen VarValue
   arbitrary = do
-    name <- NE.filter ('*' /=) <$> arbitrary
-    VarValue ('v' :| name) <$> arbitrary
+    vn <- unwrapString <$> (arbitrary :: Gen NoWildcardNonEmptyString)
+    vv <- filter (/= '*') <$> arbitrary
+    pure $ fromJust (mkVarValue vn vv)
 
 instance (Arbitrary a) => Arbitrary (NE.NonEmpty a) where
   arbitrary :: Gen (NE.NonEmpty a)
@@ -51,3 +54,22 @@ instance (Arbitrary a) => Arbitrary (NE.NonEmpty a) where
     c <- arbitrary
     cs <- arbitrary
     pure (c :| cs)
+
+instance Arbitrary NoWildcardNonEmptyString where
+  arbitrary :: Gen NoWildcardNonEmptyString
+  arbitrary = do
+    c <- oneof $ pure <$> allowedCharList
+    cs <- listOf $ elements allowedCharList
+    let res = fromJust $ mkNoWildcardNonEmptyString (c : cs) -- `fromJust` is safe here because we're only generating allowed characters.
+    pure res
+    where
+      allowedCharList = ['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'] <> ['_']
+
+instance Arbitrary NoWildcardString where
+  arbitrary :: Gen NoWildcardString
+  arbitrary = do
+    cs <- listOf $ elements allowedCharList
+    let res = fromMaybe mempty $ mkNoWildcardString cs
+    pure res
+    where
+      allowedCharList = ['a' .. 'z'] <> ['A' .. 'Z'] <> ['0' .. '9'] <> ['_']

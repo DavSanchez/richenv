@@ -1,4 +1,4 @@
-module RichEnv (clearEnvironment, toEnvList, setRichEnv, RichEnv) where
+module RichEnv (clearEnvironment, toEnvList, setRichEnv) where
 
 import RichEnv.Filters (varMaps, varPrefixes, varValues)
 import RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment)

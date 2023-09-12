@@ -50,11 +50,10 @@ data RichEnvItem
 
 instance FromJSON RichEnvItem where
   parseJSON :: Value -> Parser RichEnvItem
-  parseJSON v = do
-    let parseEnvVarNameMap = EnvVarNameMap <$> parseJSON v
-        parseEnvVarValue = EnvVarValue <$> parseJSON v
-        parseEnvVarPrefix = EnvVarPrefix <$> parseJSON v
-    parseEnvVarNameMap <|> parseEnvVarValue <|> parseEnvVarPrefix
+  parseJSON v =
+    (EnvVarNameMap <$> parseJSON v)
+      <|> (EnvVarValue <$> parseJSON v)
+      <|> (EnvVarPrefix <$> parseJSON v)
 
 instance ToJSON RichEnvItem where
   toJSON :: RichEnvItem -> Value
