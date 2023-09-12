@@ -125,6 +125,11 @@ library richenv-internal
     RichEnv.Filters
     RichEnv.Setters
     RichEnv.Types
+    RichEnv.Types.ParseError
+    RichEnv.Types.RichEnv
+    RichEnv.Types.VarMap
+    RichEnv.Types.VarPrefix
+    RichEnv.Types.VarValue
 
   -- RichEnv.Types.TOML
 
@@ -144,11 +149,11 @@ test-suite richenv-test
 
   -- Modules included in this executable, other than Main.
   other-modules:
+    ArbitraryInstances
     RichEnv.FiltersSpec
     RichEnv.SettersSpec
     RichEnvSpec
     SpecHook
-    Utils
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
