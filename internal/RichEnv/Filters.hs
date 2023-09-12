@@ -7,10 +7,10 @@ import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..
 
 -- | Gets only the 'VarMap' items from a 'RichEnv'.
 --
--- >>> varValues S.empty == S.empty
+-- >>> varValues mempty == mempty
 -- True
 -- >>> import Data.List.NonEmpty (fromList)
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> let richEnv = RichEnv $ S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varMaps :: RichEnv -> HashSet VarMap
@@ -21,10 +21,10 @@ varMaps = richEnv >>> S.foldr f S.empty
 
 -- | Gets only the 'VarValue' items from a 'RichEnv'.
 --
--- >>> varValues S.empty == S.empty
+-- >>> varValues mempty == mempty
 -- True
 -- >>> import Data.List.NonEmpty (fromList)
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> let richEnv = RichEnv $ S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varValues :: RichEnv -> HashSet VarValue
@@ -35,10 +35,10 @@ varValues = richEnv >>> S.foldr f S.empty
 
 -- | Gets only the 'VarPrefix' items from a 'RichEnv'.
 --
--- >>> varPrefixes S.empty == S.empty
+-- >>> varPrefixes mempty == mempty
 -- True
 -- >>> import Data.List.NonEmpty (fromList)
--- >>> let richEnv = S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
+-- >>> let richEnv = RichEnv $ S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
 -- >>> varPrefixes richEnv == S.fromList [VarPrefix "qux" "quux"]
 -- True
 varPrefixes :: RichEnv -> HashSet VarPrefix
