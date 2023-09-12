@@ -1,27 +1,25 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
 
 module RichEnvSpec (spec) where
 
+import ArbitraryInstances ()
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Aeson qualified as JSON
 import Data.ByteString qualified as B
 import Data.ByteString.Char8 qualified as C8
 import Data.HashSet qualified as S
-import Data.Hashable (Hashable)
 import Data.List (sort)
-import Data.List.NonEmpty (NonEmpty (..))
-import Data.List.NonEmpty qualified as NE
 import Data.Yaml qualified as Yaml
 import GHC.Generics (Generic)
 import RichEnv (clearEnvironment, setRichEnv, toEnvList)
-import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..))
+import RichEnv.Types.VarPrefix (VarPrefix (..))
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, context, describe, it, shouldBe)
 import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Arbitrary, Gen, oneof)
+import Test.QuickCheck (Arbitrary, Gen)
 import Test.QuickCheck.Arbitrary (Arbitrary (..))
 import Utils (nonEmptyVarMap, nonEmptyVarValue)
 
@@ -105,45 +103,6 @@ newtype TestType = TestType {env :: RichEnv}
 instance Arbitrary TestType where
   arbitrary :: Gen TestType
   arbitrary = TestType <$> arbitrary
-
-instance Arbitrary RichEnv where
-  arbitrary :: Gen RichEnv
-  arbitrary = RichEnv <$> arbitrary
-
-instance (Arbitrary a, Hashable a) => Arbitrary (S.HashSet a) where
-  arbitrary :: Gen (S.HashSet a)
-  arbitrary = S.fromList <$> arbitrary
-
-instance Arbitrary RichEnvItem where
-  arbitrary :: Gen RichEnvItem
-  arbitrary = oneof [EnvVarValue <$> arbitrary, EnvVarNameMap <$> arbitrary, EnvVarPrefix <$> arbitrary]
-
-instance Arbitrary VarPrefix where
-  arbitrary :: Gen VarPrefix
-  arbitrary = do
-    name <- NE.filter ('*' /=) <$> arbitrary
-    from <- NE.filter ('*' /=) <$> arbitrary
-    pure $ VarPrefix name from
-
-instance Arbitrary VarMap where
-  arbitrary :: Gen VarMap
-  arbitrary = do
-    name <- ('m' :|) . NE.filter ('*' /=) <$> arbitrary
-    from <- ('m' :|) . NE.filter ('*' /=) <$> arbitrary
-    pure $ VarMap name from
-
-instance Arbitrary VarValue where
-  arbitrary :: Gen VarValue
-  arbitrary = do
-    name <- NE.filter ('*' /=) <$> arbitrary
-    VarValue ('v' :| name) <$> arbitrary
-
-instance (Arbitrary a) => Arbitrary (NonEmpty a) where
-  arbitrary :: Gen (NonEmpty a)
-  arbitrary = do
-    c <- arbitrary
-    cs <- arbitrary
-    pure (c :| cs)
 
 -- YAML test cases that use the JSON conversion instances from Aeson
 

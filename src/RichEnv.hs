@@ -1,8 +1,9 @@
-module RichEnv (clearEnvironment, toEnvList, setRichEnv, RichEnv, VarMap (..), VarPrefix (..), VarValue (..)) where
+module RichEnv (clearEnvironment, toEnvList, setRichEnv, RichEnv) where
 
 import RichEnv.Filters (varMaps, varPrefixes, varValues)
 import RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment)
-import RichEnv.Types (Environment, RichEnv, VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types (Environment)
+import RichEnv.Types.RichEnv (RichEnv)
 import System.Environment (getEnvironment, unsetEnv)
 
 -- | Returns a list of environment variables abiding to the 'RichEnv' rules.

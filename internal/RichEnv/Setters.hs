@@ -7,7 +7,10 @@ import Data.HashSet qualified as S
 import Data.List (stripPrefix)
 import Data.List.NonEmpty (nonEmpty, toList)
 import Data.Maybe (mapMaybe)
-import RichEnv.Types (Environment, VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types (Environment)
+import RichEnv.Types.VarMap (VarMap (..))
+import RichEnv.Types.VarPrefix (VarPrefix (..))
+import RichEnv.Types.VarValue (VarValue (..))
 import System.Environment (setEnv)
 
 -- | Takes 'VarValue's and sets them as environment variables. It is a no-op if the variable name is empty.

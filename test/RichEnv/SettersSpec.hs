@@ -3,7 +3,10 @@ module RichEnv.SettersSpec (spec) where
 import Data.HashSet (HashSet)
 import Data.HashSet qualified as S
 import RichEnv.Setters (setPrefixedVars, setVarMapValues)
-import RichEnv.Types (Environment, VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types (Environment)
+import RichEnv.Types.VarMap (VarMap (..))
+import RichEnv.Types.VarPrefix (VarPrefix (..))
+import RichEnv.Types.VarValue (VarValue (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 import Utils (nonEmptyVarMap, nonEmptyVarValue)
 

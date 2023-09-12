@@ -3,7 +3,9 @@ module RichEnv.FiltersSpec (spec) where
 import Data.HashSet qualified as S
 import Data.List.NonEmpty (fromList)
 import RichEnv.Filters (varMaps, varPrefixes, varValues)
-import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..))
+import RichEnv.Types.VarPrefix (VarPrefix (..))
+import RichEnv.Types.VarValue (VarValue (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 import Utils (nonEmptyVarMap, nonEmptyVarValue)
 

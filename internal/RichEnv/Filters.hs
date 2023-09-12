@@ -3,7 +3,10 @@ module RichEnv.Filters (varMaps, varPrefixes, varValues) where
 import Control.Arrow ((>>>))
 import Data.HashSet (HashSet)
 import Data.HashSet qualified as S
-import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..), VarValue (..))
+import RichEnv.Types.RichEnv (RichEnv (richEnv), RichEnvItem (EnvVarNameMap, EnvVarPrefix, EnvVarValue))
+import RichEnv.Types.VarMap (VarMap)
+import RichEnv.Types.VarPrefix (VarPrefix)
+import RichEnv.Types.VarValue (VarValue)
 
 -- | Gets only the 'VarMap' items from a 'RichEnv'.
 --
@@ -12,7 +15,6 @@ import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..
 -- >>> import Data.List.NonEmpty (fromList)
 -- >>> let richEnv = RichEnv $ S.fromList [EnvVarValue (VarValue (fromList "foo") "bar"), EnvVarNameMap (VarMap (fromList "bar") (fromList "baz")), EnvVarPrefix (VarPrefix "qux" "quux")]
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
--- True
 varMaps :: RichEnv -> HashSet VarMap
 varMaps = richEnv >>> foldr f mempty
   where
