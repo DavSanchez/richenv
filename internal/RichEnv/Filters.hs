@@ -14,7 +14,7 @@ import RichEnv.Types (RichEnv (..), RichEnvItem (..), VarMap (..), VarPrefix (..
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varMaps :: RichEnv -> HashSet VarMap
-varMaps = richEnv >>> S.foldr f S.empty
+varMaps = richEnv >>> foldr f mempty
   where
     f (EnvVarNameMap vm) = S.insert vm
     f _ = id
@@ -28,7 +28,7 @@ varMaps = richEnv >>> S.foldr f S.empty
 -- >>> varValues richEnv == S.fromList [VarValue (fromList "foo") "bar"]
 -- True
 varValues :: RichEnv -> HashSet VarValue
-varValues = richEnv >>> S.foldr f S.empty
+varValues = richEnv >>> foldr f mempty
   where
     f (EnvVarValue vv) = S.insert vv
     f _ = id
@@ -42,7 +42,7 @@ varValues = richEnv >>> S.foldr f S.empty
 -- >>> varPrefixes richEnv == S.fromList [VarPrefix "qux" "quux"]
 -- True
 varPrefixes :: RichEnv -> HashSet VarPrefix
-varPrefixes = richEnv >>> S.foldr f S.empty
+varPrefixes = richEnv >>> foldr f mempty
   where
     f (EnvVarPrefix vp) = S.insert vp
     f _ = id
