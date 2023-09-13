@@ -5,6 +5,7 @@
 module RichEnvSpec (spec) where
 
 import ArbitraryInstances ()
+import Control.Exception (Exception (displayException))
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Aeson qualified as JSON
 import Data.ByteString qualified as B
@@ -62,30 +63,34 @@ spec = describe "RichEnv ops" $ do
 
   context "working with YAML" $ it "parses a YAML file into expected results" $ do
     getEnvironment >>= clearEnvironment
-    setTestEnv yamlBaseEnv
+    setTestEnv fileTestsBaseEnv
     let res = Yaml.decodeEither' yamlTestCase :: Either Yaml.ParseException TestType
     case res of
       Left err -> fail $ show err
-      Right actual -> testEnvList yamlTestCaseExpected (Just $ env actual)
+      Right actual -> testEnvList fileTestsCaseExpected (Just $ env actual)
+
+  context "working with JSON" $ it "parses a JSON file into expected results" $ do
+    getEnvironment >>= clearEnvironment
+    setTestEnv fileTestsBaseEnv
+    let res = JSON.eitherDecodeStrict jsonTestCase :: Either String TestType
+    case res of
+      Left err -> fail err
+      Right actual -> testEnvList fileTestsCaseExpected (Just $ env actual)
 
   context "invariants" $ do
     prop "parsing YAML from and to a RichEnv should end in the original value" $ \re -> do
-      -- putStrLn $ "SEED VALUE: " <> show re
       let yaml = Yaml.encode re
           res = Yaml.decodeEither' yaml :: Either Yaml.ParseException RichEnv
        in case res of
-            Left err -> fail $ show err
+            Left err -> fail $ displayException err
             Right actual -> do
-              -- putStrLn $ "ACTUAL VALUE: " <> show actual
               actual `shouldBe` re
     prop "parsing JSON from and to a RichEnv should end in the original value" $ \re -> do
-      -- putStrLn $ "SEED VALUE: " <> show re
       let json = JSON.encode re
           res = JSON.eitherDecode' json :: Either String RichEnv
        in case res of
             Left err -> fail err
             Right actual -> do
-              -- putStrLn $ "ACTUAL VALUE: " <> show actual
               actual `shouldBe` re
   where
     exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
@@ -109,7 +114,7 @@ instance Arbitrary TestType where
   arbitrary :: Gen TestType
   arbitrary = TestType <$> arbitrary
 
--- YAML test cases that use the JSON conversion instances from Aeson
+-- Test cases that use Aeson's FromJSON/ToJSON instances
 
 yamlTestCase :: B.ByteString
 yamlTestCase =
@@ -126,22 +131,37 @@ yamlTestCase =
         "    from: PREFIXED_*"
       ]
 
-{-
+jsonTestCase :: B.ByteString
+jsonTestCase =
+  C8.pack $
+    unlines
+      [ "{",
+        "  \"env\": [",
+        "    {",
+        "      \"name\": \"SOME\",",
+        "      \"value\": \"somevar\"",
+        "    },",
+        "    {",
+        "      \"name\": \"OTHER\",",
+        "      \"value\": \"othervar\"",
+        "    },",
+        "    {",
+        "      \"name\": \"FOO\",",
+        "      \"from\": \"SOME\"",
+        "    },",
+        "    {",
+        "      \"name\": \"NEW_*\",",
+        "      \"from\": \"PREFIXED_*\"",
+        "    }",
+        "  ]",
+        "}"
+      ]
 
-env:
-  SOME: somevar
-  OTHER: othervar
-  FOO: env.SOME
-  NEW_*: env.PREFIXED_*
-  CMD_VAR: $(curl -X POST ...)
+fileTestsBaseEnv :: [(String, String)]
+fileTestsBaseEnv = [("SOME", "bar"), ("OTHER", "othervar"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
--}
-
-yamlBaseEnv :: [(String, String)]
-yamlBaseEnv = [("SOME", "bar"), ("OTHER", "othervar"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
-
-yamlTestCaseExpected :: [(String, String)]
-yamlTestCaseExpected =
+fileTestsCaseExpected :: [(String, String)]
+fileTestsCaseExpected =
   [ ("FOO", "bar"),
     ("OTHER", "othervar"),
     ("SOME", "somevar"),

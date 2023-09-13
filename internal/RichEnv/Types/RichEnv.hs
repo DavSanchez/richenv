@@ -6,10 +6,11 @@ module RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..)) where
 
 import Control.Applicative ((<|>))
 import Control.Monad ((>=>))
-import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON), Value)
+import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON), Value, withArray)
 import Data.Aeson.Types (Parser)
 import Data.HashSet qualified as S
 import Data.Hashable (Hashable)
+import Data.Vector qualified as V
 import GHC.Generics (Generic)
 import RichEnv.Types.VarMap (VarMap)
 import RichEnv.Types.VarPrefix (VarPrefix)
@@ -29,7 +30,7 @@ instance Monoid RichEnv where
 
 instance FromJSON RichEnv where
   parseJSON :: Value -> Parser RichEnv
-  parseJSON = parseJSON >=> pure . RichEnv
+  parseJSON = withArray "RichEnv" $ traverse parseJSON >=> (pure . RichEnv . S.fromList . V.toList)
 
 instance ToJSON RichEnv where
   toJSON :: RichEnv -> Value
