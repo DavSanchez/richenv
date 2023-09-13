@@ -40,6 +40,20 @@
               alejandra.exclude = ["default.nix"];
             };
           };
+          # Run cabal test from here
+          cabal-test =
+            pkgs.runCommand "cabal-test" {
+              src = ./.;
+              nativeBuildInputs = with pkgs.haskellPackages; [ghc cabal-install] ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
+            } ''
+              set -euo pipefail
+              mkdir $out
+              cp -r $src/* $out
+              cd $out
+              export HOME=$(pwd)
+              cabal update
+              cabal test --test-show-details=streaming --test-option=--color
+            '';
         };
         devShells = {
           default = pkgs.mkShell {
