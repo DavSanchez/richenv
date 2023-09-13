@@ -51,7 +51,7 @@
               cp -r $src/* $out
               cd $out
               export HOME=$(pwd)
-              cabal update
+              cabal --http-transport=plain-http update
               cabal test --test-show-details=streaming --test-option=--color
             '';
         };
