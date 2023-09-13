@@ -5,13 +5,12 @@ on:
   push:
     branches: [master]
 jobs:
-  tests:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v22
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: nix build
       - run: nix flake check
-      - run: nix develop --command "cabal test --test-show-details=streaming --test-option=--color"
+      - run: nix develop --command cabal test --test-show-details=streaming --test-option=--color
