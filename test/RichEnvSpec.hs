@@ -59,6 +59,7 @@ spec = describe "RichEnv ops" $ do
       testEnvList
         [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
         (RichEnv . S.singleton . EnvVarPrefix <$> mkVarPrefix "NEW_" "PREFIXED_")
+
   context "working with YAML" $ it "parses a YAML file into expected results" $ do
     getEnvironment >>= clearEnvironment
     setTestEnv yamlBaseEnv
@@ -66,6 +67,7 @@ spec = describe "RichEnv ops" $ do
     case res of
       Left err -> fail $ show err
       Right actual -> testEnvList yamlTestCaseExpected (Just $ env actual)
+
   context "invariants" $ do
     prop "parsing YAML from and to a RichEnv should end in the original value" $ \re -> do
       -- putStrLn $ "SEED VALUE: " <> show re
@@ -97,7 +99,9 @@ testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort
 testEnvList :: [(String, String)] -> Maybe RichEnv -> Expectation
 testEnvList expected re = toEnvList (fromJust re) >>= (`shouldBe` sort expected) . sort
 
-newtype TestType = TestType {env :: RichEnv}
+newtype TestType = TestType
+  { env :: RichEnv
+  }
   deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON, ToJSON)
 
@@ -121,6 +125,17 @@ yamlTestCase =
         "  - name: NEW_*", -- This is the same as `EnvVarPrefix (VarPrefix "NEW_" "PREFIXED_")`
         "    from: PREFIXED_*"
       ]
+
+{-
+
+env:
+  SOME: somevar
+  OTHER: othervar
+  FOO: env.SOME
+  NEW_*: env.PREFIXED_*
+  CMD_VAR: $(curl -X POST ...)
+
+-}
 
 yamlBaseEnv :: [(String, String)]
 yamlBaseEnv = [("SOME", "bar"), ("OTHER", "othervar"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
