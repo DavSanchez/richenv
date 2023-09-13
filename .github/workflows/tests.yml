@@ -12,7 +12,7 @@ jobs:
       - uses: cachix/install-nix-action@v22
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: nix build
+      - uses: DeterminateSystems/magic-nix-cache-action@v2
       - run: nix flake check
       - run: nix develop --command cabal update
       - run: nix develop --command cabal test --test-show-details=streaming --test-option=--color
