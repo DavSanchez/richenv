@@ -137,6 +137,7 @@ library richenv-internal
     , aeson
     , hashable
     , unordered-containers
+    , vector
 
   -- , toml-parser
 
