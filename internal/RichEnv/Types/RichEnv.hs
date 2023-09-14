@@ -2,67 +2,60 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE InstanceSigs #-}
 
-module RichEnv.Types.RichEnv (RichEnv (..), RichEnvItem (..)) where
+module RichEnv.Types.RichEnv (RichEnv (RichEnv, values, mappings, prefixes), Values (Values, unValues), Mappings (Mappings, unMappings), Prefixes (Prefixes, unPrefixes)) where
 
-import Control.Applicative ((<|>))
-import Control.Monad ((>=>))
-import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON), Value, withArray)
-import Data.Aeson.Types (Parser)
-import Data.HashSet qualified as S
-import Data.Hashable (Hashable)
-import Data.Vector qualified as V
+import Data.Aeson (FromJSON, ToJSON)
+import Data.HashMap.Strict qualified as HM
 import GHC.Generics (Generic)
-import RichEnv.Types.VarMap (VarMap)
-import RichEnv.Types.VarPrefix (VarPrefix)
-import RichEnv.Types.VarValue (VarValue)
 
-newtype RichEnv = RichEnv {richEnv :: S.HashSet RichEnvItem}
+data RichEnv = RichEnv
+  { values :: Values,
+    mappings :: Mappings,
+    prefixes :: Prefixes
+  }
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable)
+  deriving anyclass (FromJSON, ToJSON)
 
 instance Semigroup RichEnv where
   (<>) :: RichEnv -> RichEnv -> RichEnv
-  (<>) (RichEnv a) (RichEnv b) = RichEnv $ a <> b
+  (<>) (RichEnv a b c) (RichEnv d e f) = RichEnv (a <> d) (b <> e) (c <> f)
 
 instance Monoid RichEnv where
   mempty :: RichEnv
-  mempty = RichEnv mempty
+  mempty = RichEnv mempty mempty mempty
 
-instance FromJSON RichEnv where
-  parseJSON :: Value -> Parser RichEnv
-  parseJSON = withArray "RichEnv" $ traverse parseJSON >=> (pure . RichEnv . S.fromList . V.toList)
-
-instance ToJSON RichEnv where
-  toJSON :: RichEnv -> Value
-  toJSON (RichEnv env) = toJSON env
-
-  toEncoding :: RichEnv -> Encoding
-  toEncoding (RichEnv env) = toEncoding env
-
-data RichEnvItem
-  = -- | Maps an environment variable name to a different one.
-    EnvVarNameMap VarMap
-  | -- | Sets an environment variable to a specific value.
-    EnvVarValue VarValue
-  | -- | Maps all environment variables with a certain prefix to a new set of environment variables with a different prefix.
-    EnvVarPrefix VarPrefix
+newtype Values = Values {unValues :: HM.HashMap String String}
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable)
+  deriving anyclass (FromJSON, ToJSON)
 
-instance FromJSON RichEnvItem where
-  parseJSON :: Value -> Parser RichEnvItem
-  parseJSON v =
-    (EnvVarNameMap <$> parseJSON v)
-      <|> (EnvVarValue <$> parseJSON v)
-      <|> (EnvVarPrefix <$> parseJSON v)
+instance Semigroup Values where
+  (<>) :: Values -> Values -> Values
+  (<>) (Values a) (Values b) = Values (a <> b)
 
-instance ToJSON RichEnvItem where
-  toJSON :: RichEnvItem -> Value
-  toJSON (EnvVarValue vv) = toJSON vv
-  toJSON (EnvVarNameMap vm) = toJSON vm
-  toJSON (EnvVarPrefix vp) = toJSON vp
+instance Monoid Values where
+  mempty :: Values
+  mempty = Values mempty
 
-  toEncoding :: RichEnvItem -> Encoding
-  toEncoding (EnvVarValue vv) = toEncoding vv
-  toEncoding (EnvVarNameMap vm) = toEncoding vm
-  toEncoding (EnvVarPrefix vp) = toEncoding vp
+newtype Mappings = Mappings {unMappings :: HM.HashMap String String}
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
+
+instance Semigroup Mappings where
+  (<>) :: Mappings -> Mappings -> Mappings
+  (<>) (Mappings a) (Mappings b) = Mappings (a <> b)
+
+instance Monoid Mappings where
+  mempty :: Mappings
+  mempty = Mappings mempty
+
+newtype Prefixes = Prefixes {unPrefixes :: HM.HashMap String [String]}
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON, ToJSON)
+
+instance Semigroup Prefixes where
+  (<>) :: Prefixes -> Prefixes -> Prefixes
+  (<>) (Prefixes a) (Prefixes b) = Prefixes (a <> b)
+
+instance Monoid Prefixes where
+  mempty :: Prefixes
+  mempty = Prefixes mempty

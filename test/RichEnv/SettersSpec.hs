@@ -1,70 +1,67 @@
 module RichEnv.SettersSpec (spec) where
 
-import Data.HashSet (HashSet)
-import Data.HashSet qualified as S
-import RichEnv.Setters (setPrefixedVars, setVarMapValues)
+import Data.HashMap.Strict qualified as HM
+import RichEnv.Setters (mappingsToValues, prefixesToValues)
 import RichEnv.Types (Environment)
-import RichEnv.Types.VarMap (VarMap (..), mkVarMap)
-import RichEnv.Types.VarPrefix (VarPrefix (..), mkVarPrefix)
-import RichEnv.Types.VarValue (VarValue (..), mkVarValue)
+import RichEnv.Types.RichEnv (Mappings (..), Prefixes (..), Values (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 spec :: Spec
 spec = do
-  describe "varMaps" $ do
+  describe "mappings" $ do
     it "returns an empty environment when given an empty set" $ do
-      setVarMapValues mempty mempty `shouldBe` mempty
+      mappingsToValues mempty mempty `shouldBe` mempty
     it "remaps a single environment variable" $ do
-      setVarMapValues exampleEnv <$> testVarMap `shouldBe` expectedVars
-  describe "varPrefixes" $ do
+      mappingsToValues exampleEnv testVarMap `shouldBe` expectedVars
+  describe "prefixes" $ do
     it "returns an empty environment when given an empty set" $ do
-      setPrefixedVars mempty mempty `shouldBe` mempty
+      prefixesToValues mempty mempty `shouldBe` mempty
     it "remaps a single environment variable" $ do
-      setPrefixedVars exampleEnv <$> testVarPrefix `shouldBe` expectedPrefixedVars
+      prefixesToValues exampleEnv testVarPrefix `shouldBe` expectedPrefixedVars
     it "passes all environment variables adding a prefix" $ do
-      setPrefixedVars exampleEnv <$> passAllAndAddPrefix `shouldBe` expectedAllPrefixedVars
+      prefixesToValues exampleEnv passAllAndAddPrefix `shouldBe` expectedAllPrefixedVars
     it "remaps prefixed environment variables removing the prefix" $ do
-      setPrefixedVars exampleEnv <$> passSomeAndRemovePrefix `shouldBe` expectedSomePrefixedVars
+      prefixesToValues exampleEnv passSomeAndRemovePrefix `shouldBe` expectedSomePrefixedVars
     it "passes only prefixed environment variables preserving the prefix" $ do
-      setPrefixedVars exampleEnv <$> passOnlyPrefixedPreservingPrefix `shouldBe` expectedOnlyPrefixedPreservingPrefix
+      prefixesToValues exampleEnv passOnlyPrefixedPreservingPrefix `shouldBe` expectedOnlyPrefixedPreservingPrefix
     it "passes all environment variables" $ do
-      setPrefixedVars exampleEnv <$> passAll `shouldBe` expectedAll
+      prefixesToValues exampleEnv passAll `shouldBe` expectedAll
 
 exampleEnv :: Environment
 exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
-testVarMap :: Maybe (HashSet VarMap)
-testVarMap = S.singleton <$> mkVarMap "SOME" "FOO"
+testVarMap :: Mappings
+testVarMap = Mappings $ HM.singleton "SOME" "FOO"
 
-expectedVars :: Maybe (HashSet VarValue)
-expectedVars = S.singleton <$> mkVarValue "SOME" "bar"
+expectedVars :: Values
+expectedVars = Values $ HM.singleton "SOME" "bar"
 
-testVarPrefix :: Maybe (HashSet VarPrefix)
-testVarPrefix = S.singleton <$> mkVarPrefix "NEW_" "PREFIXED_"
+testVarPrefix :: Prefixes
+testVarPrefix = Prefixes $ HM.singleton "NEW_" ["PREFIXED_"]
 
-expectedPrefixedVars :: Maybe (HashSet VarValue)
-expectedPrefixedVars = S.fromList <$> sequence [mkVarValue "NEW_VAR" "content", mkVarValue "NEW_VAR2" "content2"]
+expectedPrefixedVars :: Values
+expectedPrefixedVars = Values $ HM.fromList [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
 
-passAllAndAddPrefix :: Maybe (HashSet VarPrefix)
-passAllAndAddPrefix = S.singleton <$> mkVarPrefix "NEWPREFIX_" ""
+passAllAndAddPrefix :: Prefixes
+passAllAndAddPrefix = Prefixes $ HM.singleton "NEWPREFIX_" [""]
 
-expectedAllPrefixedVars :: Maybe (HashSet VarValue)
-expectedAllPrefixedVars = S.fromList <$> sequence [mkVarValue "NEWPREFIX_FOO" "bar", mkVarValue "NEWPREFIX_BAZ" "qux", mkVarValue "NEWPREFIX_PREFIXED_VAR" "content", mkVarValue "NEWPREFIX_PREFIXED_VAR2" "content2"]
+expectedAllPrefixedVars :: Values
+expectedAllPrefixedVars = Values $ HM.fromList [("NEWPREFIX_FOO", "bar"), ("NEWPREFIX_BAZ", "qux"), ("NEWPREFIX_PREFIXED_VAR", "content"), ("NEWPREFIX_PREFIXED_VAR2", "content2")]
 
-passSomeAndRemovePrefix :: Maybe (HashSet VarPrefix)
-passSomeAndRemovePrefix = S.singleton <$> mkVarPrefix "" "PREFIXED_"
+passSomeAndRemovePrefix :: Prefixes
+passSomeAndRemovePrefix = Prefixes $ HM.singleton "" ["PREFIXED_"]
 
-expectedSomePrefixedVars :: Maybe (HashSet VarValue)
-expectedSomePrefixedVars = S.fromList <$> sequence [mkVarValue "VAR" "content", mkVarValue "VAR2" "content2"]
+expectedSomePrefixedVars :: Values
+expectedSomePrefixedVars = Values $ HM.fromList [("VAR", "content"), ("VAR2", "content2")]
 
-passOnlyPrefixedPreservingPrefix :: Maybe (HashSet VarPrefix)
-passOnlyPrefixedPreservingPrefix = S.singleton <$> mkVarPrefix "PREFIXED_" "PREFIXED_"
+passOnlyPrefixedPreservingPrefix :: Prefixes
+passOnlyPrefixedPreservingPrefix = Prefixes $ HM.singleton "PREFIXED_" ["PREFIXED_"]
 
-expectedOnlyPrefixedPreservingPrefix :: Maybe (HashSet VarValue)
-expectedOnlyPrefixedPreservingPrefix = S.fromList <$> sequence [mkVarValue "PREFIXED_VAR" "content", mkVarValue "PREFIXED_VAR2" "content2"]
+expectedOnlyPrefixedPreservingPrefix :: Values
+expectedOnlyPrefixedPreservingPrefix = Values $ HM.fromList [("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
-passAll :: Maybe (HashSet VarPrefix)
-passAll = S.singleton <$> mkVarPrefix mempty mempty
+passAll :: Prefixes
+passAll = Prefixes $ HM.singleton mempty mempty
 
-expectedAll :: Maybe (HashSet VarValue)
-expectedAll = S.fromList <$> sequence [mkVarValue "FOO" "bar", mkVarValue "BAZ" "qux", mkVarValue "PREFIXED_VAR" "content", mkVarValue "PREFIXED_VAR2" "content2"]
+expectedAll :: Values
+expectedAll = Values $ HM.fromList [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
