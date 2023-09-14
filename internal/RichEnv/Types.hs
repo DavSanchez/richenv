@@ -4,7 +4,6 @@
 
 module RichEnv.Types (Environment, NoWildcardNonEmptyString, NoWildcardString, mkNoWildcardNonEmptyString, mkNoWildcardString, UnwrapString (..)) where
 
-import Data.Hashable (Hashable)
 import Data.List.NonEmpty qualified as NE
 import GHC.Generics (Generic)
 
@@ -15,7 +14,6 @@ class (Show a) => UnwrapString a where
 
 newtype NoWildcardNonEmptyString = NoWildcardNonEmptyString (NE.NonEmpty Char)
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable)
 
 mkNoWildcardNonEmptyString :: String -> Maybe NoWildcardNonEmptyString
 mkNoWildcardNonEmptyString s
@@ -49,7 +47,6 @@ instance Semigroup NoWildcardNonEmptyString where
 
 newtype NoWildcardString = NoWildcardString String
   deriving stock (Eq, Show, Generic)
-  deriving anyclass (Hashable)
 
 mkNoWildcardString :: String -> Maybe NoWildcardString
 mkNoWildcardString s
