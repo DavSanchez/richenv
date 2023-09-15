@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE InstanceSigs #-}
-
 module RichEnv.Types (Environment, NoWildcardNonEmptyString, NoWildcardString, mkNoWildcardNonEmptyString, mkNoWildcardString, UnwrapString (..)) where
 
 import Data.List.NonEmpty qualified as NE

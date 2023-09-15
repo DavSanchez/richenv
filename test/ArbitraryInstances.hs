@@ -1,10 +1,12 @@
-{-# LANGUAGE InstanceSigs #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module ArbitraryInstances () where
 
 import Data.HashMap.Strict qualified as HM
-import RichEnv.Types.RichEnv (Mappings (..), Prefixes (..), RichEnv (..), Values (..))
+import RichEnv.Types.Mappings (Mappings (..))
+import RichEnv.Types.Prefixes (Prefixes (..))
+import RichEnv.Types.RichEnv (RichEnv (..))
+import RichEnv.Types.Values (Values (..))
 import Test.QuickCheck (Arbitrary (arbitrary), Gen)
 
 instance Arbitrary RichEnv where

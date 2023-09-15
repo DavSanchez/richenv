@@ -92,9 +92,11 @@ common common-options
   -- Base language which the package is written in.
   default-language:   Haskell2010
   default-extensions:
+    DeriveAnyClass
+    DeriveGeneric
     DerivingStrategies
     ImportQualifiedPost
-    OverloadedStrings
+    InstanceSigs
 
 library
   -- Import common options.
@@ -124,8 +126,10 @@ library richenv-internal
   exposed-modules:
     RichEnv.Setters
     RichEnv.Types
-    RichEnv.Types.ParseError
+    RichEnv.Types.Mappings
+    RichEnv.Types.Prefixes
     RichEnv.Types.RichEnv
+    RichEnv.Types.Values
 
   build-depends:
     , aeson
@@ -162,6 +166,7 @@ test-suite richenv-test
     , aeson
     , bytestring
     , hspec
+    , process
     , QuickCheck
     , richenv
     , richenv-internal
