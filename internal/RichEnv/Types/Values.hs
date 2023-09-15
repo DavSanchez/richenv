@@ -3,9 +3,10 @@ module RichEnv.Types.Values (Values (Values, unValues)) where
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
 import Data.Aeson.Types (Parser)
 import Data.HashMap.Strict qualified as HM
+import Data.Text (Text)
 import GHC.Generics (Generic)
 
-newtype Values = Values {unValues :: HM.HashMap String String}
+newtype Values = Values {unValues :: HM.HashMap Text Text}
   deriving stock (Eq, Show, Generic)
 
 instance FromJSON Values where

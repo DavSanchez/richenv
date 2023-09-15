@@ -8,6 +8,7 @@ import RichEnv.Types.Prefixes (Prefixes (..))
 import RichEnv.Types.RichEnv (RichEnv (..))
 import RichEnv.Types.Values (Values (..))
 import Test.QuickCheck (Arbitrary (arbitrary), Gen)
+import Test.QuickCheck.Instances.Text ()
 
 instance Arbitrary RichEnv where
   arbitrary :: Gen RichEnv

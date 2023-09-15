@@ -10,7 +10,7 @@ import Data.List (sort)
 import Data.Yaml qualified as Yaml
 import GHC.Generics (Generic)
 import RichEnv (clearEnvironment, setRichEnv, toEnvList)
-import RichEnv.Types (Environment)
+import RichEnv.Types (Environment, fromEnvironment, toEnvironment)
 import RichEnv.Types.Mappings (Mappings (..))
 import RichEnv.Types.Prefixes (Prefixes (..))
 import RichEnv.Types.RichEnv (RichEnv (..))
@@ -25,7 +25,7 @@ spec :: Spec
 spec = describe "RichEnv ops" $ do
   context "setting environment" $ do
     it "set a single environment variable through RichEnv" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setRichEnv
         RichEnv
           { values = Values $ HM.singleton "SOME" "var",
@@ -34,7 +34,7 @@ spec = describe "RichEnv ops" $ do
           }
       testEnv [("SOME", "var")]
     it "set multiple environment variables through RichEnv" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setRichEnv
         RichEnv
           { values = Values $ HM.fromList [("SOME", "var"), ("OTHER", "othervar")],
@@ -43,7 +43,7 @@ spec = describe "RichEnv ops" $ do
           }
       testEnv [("SOME", "var"), ("OTHER", "othervar")]
     it "remaps existing environment variables" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setTestEnv exampleEnv
       setRichEnv
         RichEnv
@@ -53,7 +53,7 @@ spec = describe "RichEnv ops" $ do
           }
       testEnv [("SOME", "bar")]
     it "remaps prefixed variables" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setTestEnv exampleEnv
       setRichEnv
         RichEnv
@@ -64,7 +64,7 @@ spec = describe "RichEnv ops" $ do
       testEnv [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
   context "getting the environment variable list" $ do
     it "gets the environment variable list" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setTestEnv exampleEnv
       testEnvList
         [("SOME", "bar")]
@@ -74,7 +74,7 @@ spec = describe "RichEnv ops" $ do
             values = mempty
           }
     it "gets the environment variable list with prefixes" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setTestEnv exampleEnv
       testEnvList
         [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
@@ -86,7 +86,7 @@ spec = describe "RichEnv ops" $ do
         )
 
   context "working with YAML" $ it "parses a YAML file into expected results" $ do
-    getEnvironment >>= clearEnvironment
+    clearEnv
     setTestEnv fileTestsBaseEnv
     let res = Yaml.decodeEither' yamlTestCase :: Either Yaml.ParseException TestType
     case res of
@@ -94,7 +94,7 @@ spec = describe "RichEnv ops" $ do
       Right actual -> testEnvList fileTestsCaseExpected (environ actual)
 
   context "working with JSON" $ it "parses a JSON file into expected results" $ do
-    getEnvironment >>= clearEnvironment
+    clearEnv
     setTestEnv fileTestsBaseEnv
     let res = JSON.eitherDecodeStrict jsonTestCase :: Either String TestType
     case res of
@@ -119,7 +119,7 @@ spec = describe "RichEnv ops" $ do
 
   context "Working with System.Process" $ do
     it "should work with System.Process" $ do
-      getEnvironment >>= clearEnvironment
+      clearEnv
       setTestEnv exampleEnv
       envList <-
         toEnvList
@@ -128,17 +128,20 @@ spec = describe "RichEnv ops" $ do
               mappings = Mappings $ HM.singleton "SOME" "FOO",
               values = Values $ HM.singleton "OTHER" "othervar"
             }
-      let envProcess = (proc "env" []) {env = Just envList, std_out = CreatePipe}
+      let envProcess = (proc "env" []) {env = Just (fromEnvironment envList), std_out = CreatePipe}
       out <- lines <$> readCreateProcess envProcess mempty
       sort out `shouldBe` sort ["NEW_VAR=content", "NEW_VAR2=content2", "OTHER=othervar", "SOME=bar"]
   where
     exampleEnv = [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
 
+clearEnv :: IO ()
+clearEnv = getEnvironment >>= clearEnvironment . toEnvironment
+
 setTestEnv :: Environment -> IO ()
-setTestEnv = mapM_ (uncurry setEnv)
+setTestEnv = mapM_ (uncurry setEnv) . fromEnvironment
 
 testEnv :: Environment -> Expectation
-testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort
+testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort . toEnvironment
 
 testEnvList :: Environment -> RichEnv -> Expectation
 testEnvList expected re = toEnvList re >>= (`shouldBe` sort expected) . sort

@@ -1,13 +1,14 @@
 module RichEnv (clearEnvironment, toEnvList, setRichEnv) where
 
+import Data.Text qualified as T
 import RichEnv.Setters (mappingsToValues, prefixesToValues, richEnvToValues, valuesToEnv, valuesToEnvList)
-import RichEnv.Types (Environment)
+import RichEnv.Types (Environment, toEnvironment)
 import RichEnv.Types.RichEnv (RichEnv (..))
 import System.Environment (getEnvironment, unsetEnv)
 
 -- | Returns a list of environment variables abiding to the 'RichEnv' rules.
 toEnvList :: RichEnv -> IO Environment
-toEnvList re = valuesToEnvList . newEnvSet <$> getEnvironment
+toEnvList re = valuesToEnvList . newEnvSet . toEnvironment <$> getEnvironment
   where
     vvs = values re
     vms = flip mappingsToValues (mappings re)
@@ -16,10 +17,8 @@ toEnvList re = valuesToEnvList . newEnvSet <$> getEnvironment
 
 -- | Sets the environment variables available to the current process abiding to the 'RichEnv' rules.
 setRichEnv :: RichEnv -> IO ()
--- setRichEnv = undefined
-
 setRichEnv re = do
-  currentEnv <- getEnvironment
+  currentEnv <- toEnvironment <$> getEnvironment
   clearEnvironment currentEnv
   valuesToEnv (richEnvToValues currentEnv re)
 
@@ -39,4 +38,4 @@ setRichEnv re = do
 -- >>> env' == [("FOO", "bar")]
 -- True
 clearEnvironment :: Environment -> IO ()
-clearEnvironment = mapM_ (unsetEnv . fst)
+clearEnvironment = mapM_ (unsetEnv . T.unpack . fst)

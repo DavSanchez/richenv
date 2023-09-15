@@ -1,9 +1,18 @@
-module RichEnv.Types (Environment, NoWildcardNonEmptyString, NoWildcardString, mkNoWildcardNonEmptyString, mkNoWildcardString, UnwrapString (..)) where
+module RichEnv.Types (Environment, fromEnvironment, toEnvironment, NoWildcardNonEmptyString, NoWildcardString, mkNoWildcardNonEmptyString, mkNoWildcardString, UnwrapString (..)) where
 
+import Data.Bifunctor (bimap)
 import Data.List.NonEmpty qualified as NE
+import Data.Text (Text)
+import Data.Text qualified as T
 import GHC.Generics (Generic)
 
-type Environment = [(String, String)]
+type Environment = [(Text, Text)]
+
+fromEnvironment :: Environment -> [(String, String)]
+fromEnvironment = fmap (bimap T.unpack T.unpack)
+
+toEnvironment :: [(String, String)] -> Environment
+toEnvironment = fmap (bimap T.pack T.pack)
 
 class (Show a) => UnwrapString a where
   unwrapString :: a -> String

@@ -2,9 +2,10 @@ module RichEnv.Setters (mappingsToValues, prefixesToValues, valuesToEnv, valuesT
 
 import Data.Bifunctor (first)
 import Data.HashMap.Lazy qualified as HM
-import Data.List (stripPrefix)
 import Data.Maybe (mapMaybe)
-import RichEnv.Types (Environment)
+import Data.Text (Text)
+import Data.Text qualified as T
+import RichEnv.Types (Environment, fromEnvironment)
 import RichEnv.Types.Mappings (Mappings (Mappings, unMappings))
 import RichEnv.Types.Prefixes (Prefixes (Prefixes, unPrefixes))
 import RichEnv.Types.RichEnv (RichEnv (..))
@@ -12,7 +13,7 @@ import RichEnv.Types.Values (Values (Values, unValues))
 import System.Environment (setEnv)
 
 valuesToEnv :: Values -> IO ()
-valuesToEnv = mapM_ (uncurry setEnv) . HM.toList . unValues
+valuesToEnv = mapM_ (uncurry setEnv) . fromEnvironment . HM.toList . unValues
 
 valuesToEnvList :: Values -> Environment
 valuesToEnvList = HM.toList . unValues
@@ -35,7 +36,7 @@ prefixesToValues currentEnv p =
       res = if null prefixes' then [currentEnv] else fmap (setNewPrefix currentEnv) prefixes'
    in toValues $ mconcat res
 
-setNewPrefix :: Environment -> (String, [String]) -> Environment
+setNewPrefix :: Environment -> (Text, [Text]) -> Environment
 setNewPrefix currentEnv (newPrefix, []) = fmap (first (newPrefix <>)) currentEnv
 setNewPrefix currentEnv (newPrefix, [""]) = fmap (first (newPrefix <>)) currentEnv
 setNewPrefix currentEnv (newPrefix, oldPrefixes) =
@@ -43,9 +44,9 @@ setNewPrefix currentEnv (newPrefix, oldPrefixes) =
       newPrefixedVars = (fmap . fmap) (first (newPrefix <>)) varsWithoutPrefixes
    in mconcat newPrefixedVars
 
-removePrefix :: Environment -> String -> Environment
+removePrefix :: Environment -> Text -> Environment
 removePrefix currentEnv oldPrefix =
-  let getWithoutPrefix old (k, v) = stripPrefix old k >>= \sk -> pure (sk, v)
+  let getWithoutPrefix old (k, v) = T.stripPrefix old k >>= \sk -> pure (sk, v)
    in mapMaybe (getWithoutPrefix oldPrefix) currentEnv
 
 toValues :: Environment -> Values
