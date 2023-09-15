@@ -34,6 +34,7 @@
               ormolu.enable = true;
               hlint.enable = true;
               hpack.enable = true;
+              yamllint.enable = true;
               # hunspell.enable = true;
             };
             settings = {
