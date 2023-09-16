@@ -9,7 +9,7 @@ mkDerivation {
   libraryHaskellDepends = [ aeson base text unordered-containers ];
   testHaskellDepends = [
     aeson base bytestring hspec process QuickCheck quickcheck-instances
-    unordered-containers yaml
+    text unordered-containers yaml
   ];
   testToolDepends = [ hspec-discover ];
   doHaddock = false;
