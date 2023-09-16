@@ -25,20 +25,5 @@ jobs:
       - name: Run Nix checks
         run: nix flake check
 
-      - name: Configure the build
-        run: cabal configure --enable-nix --enable-tests --enable-benchmarks --disable-documentation
-
-      - name: Install dependencies
-        run: nix develop --command cabal --enable-nix build all --only-dependencies
-
-      - name: Build
-        run: nix develop --command cabal --enable-nix build all
-
-      - name: Run tests
-        run: nix develop --command cabal test all
-
-      # - name: Check cabal file
-      #   run: nix develop --command cabal check
-
-      - name: Build documentation
-        run: nix develop --command cabal --enable-nix haddock all
+      - name: Build with Nix (runs tests)
+        run: nix build
