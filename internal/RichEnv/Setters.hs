@@ -22,24 +22,26 @@ valuesToEnvList = HM.toList . unValues
 mappingsToValues :: Environment -> Mappings -> Values
 mappingsToValues _ (Mappings m) | null m = mempty
 mappingsToValues currentEnv m =
-  let mappings' = HM.toList $ unMappings m
+  let mappings' = unMappings m
       value from = lookup from currentEnv
-      setMappingValue (_, Nothing) = id
-      setMappingValue (k, Just v) = HM.insert k v
-   in Values $ foldr (setMappingValue . fmap value) mempty mappings'
+      setMappingValue _ Nothing = id
+      setMappingValue k (Just v) = HM.insert k v
+      mappingsToValues' k v = setMappingValue k (value v)
+   in Values $ HM.foldrWithKey' mappingsToValues' mempty mappings'
 
 -- | Takes an environment list and all the prefix mappings and prepares a set of environment variables according to the RichEnv rules.
 prefixesToValues :: Environment -> Prefixes -> Values
 prefixesToValues _ (Prefixes p) | null p = mempty
 prefixesToValues currentEnv p =
-  let prefixes' = HM.toList $ unPrefixes p
-      res = if null prefixes' then [currentEnv] else fmap (setNewPrefix currentEnv) prefixes'
-   in toValues $ mconcat res
+  let prefixes' = unPrefixes p
+      prefixesToValues' k v env = env <> setNewPrefix k v currentEnv
+      res = if null prefixes' then currentEnv else HM.foldrWithKey' prefixesToValues' mempty prefixes'
+   in toValues res
 
-setNewPrefix :: Environment -> (Text, [Text]) -> Environment
-setNewPrefix currentEnv (newPrefix, []) = fmap (first (newPrefix <>)) currentEnv
-setNewPrefix currentEnv (newPrefix, [""]) = fmap (first (newPrefix <>)) currentEnv
-setNewPrefix currentEnv (newPrefix, oldPrefixes) =
+setNewPrefix :: Text -> [Text] -> Environment -> Environment
+setNewPrefix newPrefix [] currentEnv = fmap (first (newPrefix <>)) currentEnv
+setNewPrefix newPrefix [""] currentEnv = fmap (first (newPrefix <>)) currentEnv
+setNewPrefix newPrefix oldPrefixes currentEnv =
   let varsWithoutPrefixes = removePrefix currentEnv <$> oldPrefixes
       newPrefixedVars = (fmap . fmap) (first (newPrefix <>)) varsWithoutPrefixes
    in mconcat newPrefixedVars
