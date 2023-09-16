@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "ghc-version=$(nix develop --command ghc --numeric-version)"
           echo "cabal-version=$(nix develop --command cabal --numeric-version)"
-          echo "cabal-store=$HOME/.cabal/store"
+          echo "cabal-store=${HOME}/.cabal/store"
 
       - name: Run Nix checks
         run: nix flake check
