@@ -1,50 +1,62 @@
-module RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment) where
+module RichEnv.Setters (mappingsToValues, prefixesToValues, valuesToEnv, valuesToEnvList, richEnvToValues) where
 
-import Control.Monad (unless)
-import Data.Bifunctor (bimap, first)
-import Data.HashSet (HashSet)
-import Data.HashSet qualified as S
-import Data.List (stripPrefix)
+import Data.Bifunctor (first)
+import Data.HashMap.Lazy qualified as HM
 import Data.Maybe (mapMaybe)
-import RichEnv.Types (Environment, UnwrapString (unwrapString))
-import RichEnv.Types.VarMap (VarMap (..))
-import RichEnv.Types.VarPrefix (VarPrefix (..))
-import RichEnv.Types.VarValue (VarValue (..), mkVarValue)
+import Data.Text (Text)
+import Data.Text qualified as T
+import RichEnv.Types (Environment, fromEnvironment)
+import RichEnv.Types.Mappings (Mappings (Mappings, unMappings))
+import RichEnv.Types.Prefixes (Prefixes (Prefixes, unPrefixes))
+import RichEnv.Types.RichEnv (RichEnv (..))
+import RichEnv.Types.Values (Values (Values, unValues))
 import System.Environment (setEnv)
 
--- | Takes 'VarValue's and sets them as environment variables. It is a no-op if the variable name is empty.
-setVarValueEnv :: VarValue -> IO ()
-setVarValueEnv vv = do
-  let name = unwrapString $ vvName vv
-      value = unwrapString $ vvValue vv
-  unless (null name) $ setEnv name value
+valuesToEnv :: Values -> IO ()
+valuesToEnv = mapM_ (uncurry setEnv) . fromEnvironment . HM.toList . unValues
 
-varValuesToEnvironment :: HashSet VarValue -> Environment
-varValuesToEnvironment = fmap toTuple . S.toList
-  where
-    toTuple vv = bimap unwrapString unwrapString (vvName vv, vvValue vv)
+valuesToEnvList :: Values -> Environment
+valuesToEnvList = HM.toList . unValues
 
--- | Takes an environment list and all the 'VarMap's and prepares a valid @HashSet@ of 'VarValue's according to the RichEnv rules.
-setVarMapValues :: Environment -> HashSet VarMap -> HashSet VarValue
-setVarMapValues cEnv = foldr setVarMapValue mempty
-  where
-    setVarMapValue vm = do
-      let name = unwrapString $ vmName vm
-          from = unwrapString $ vmFrom vm
-          value = lookup from cEnv
-      case value of
-        Just v -> maybe id S.insert $ mkVarValue name v
-        Nothing -> id
+-- | Takes an environment list and all the value mappings and prepares a set of environment variables according to the RichEnv rules.
+mappingsToValues :: Environment -> Mappings -> Values
+mappingsToValues _ (Mappings m) | null m = mempty
+mappingsToValues currentEnv m =
+  let mappings' = unMappings m
+      value from = lookup from currentEnv
+      setMappingValue _ Nothing = id
+      setMappingValue k (Just v) = HM.insert k v
+      mappingsToValues' k v = setMappingValue k (value v)
+   in Values $ HM.foldrWithKey' mappingsToValues' mempty mappings'
 
--- | Takes an environment list and all the 'VarPrefix'es and prepares a @HashSet@ of 'VarValue's according to the RichEnv rules.
-setPrefixedVars :: Environment -> HashSet VarPrefix -> HashSet VarValue
-setPrefixedVars cEnv = foldr setPrefixedVar mempty
-  where
-    setPrefixedVar vp = do
-      let newPrefix = unwrapString $ vpName vp
-          oldPrefix = unwrapString $ vpFrom vp
-          varsWithoutPrefix = mapMaybe (getWithoutPrefix oldPrefix) cEnv
-          newPrefixedVars = fmap (first (newPrefix <>)) varsWithoutPrefix
-          varValues = mapMaybe (uncurry mkVarValue) newPrefixedVars
-      S.union $ S.fromList varValues
-    getWithoutPrefix old (k, v) = stripPrefix old k >>= \sk -> pure (sk, v)
+-- | Takes an environment list and all the prefix mappings and prepares a set of environment variables according to the RichEnv rules.
+prefixesToValues :: Environment -> Prefixes -> Values
+prefixesToValues _ (Prefixes p) | null p = mempty
+prefixesToValues currentEnv p =
+  let prefixes' = unPrefixes p
+      prefixesToValues' k v env = env <> setNewPrefix k v currentEnv
+      res = if null prefixes' then currentEnv else HM.foldrWithKey' prefixesToValues' mempty prefixes'
+   in toValues res
+
+setNewPrefix :: Text -> [Text] -> Environment -> Environment
+setNewPrefix newPrefix [] currentEnv = fmap (first (newPrefix <>)) currentEnv
+setNewPrefix newPrefix [""] currentEnv = fmap (first (newPrefix <>)) currentEnv
+setNewPrefix newPrefix oldPrefixes currentEnv =
+  let varsWithoutPrefixes = removePrefix currentEnv <$> oldPrefixes
+      newPrefixedVars = (fmap . fmap) (first (newPrefix <>)) varsWithoutPrefixes
+   in mconcat newPrefixedVars
+
+removePrefix :: Environment -> Text -> Environment
+removePrefix currentEnv oldPrefix =
+  let getWithoutPrefix old (k, v) = T.stripPrefix old k >>= \sk -> pure (sk, v)
+   in mapMaybe (getWithoutPrefix oldPrefix) currentEnv
+
+toValues :: Environment -> Values
+toValues = Values . HM.fromList
+
+richEnvToValues :: Environment -> RichEnv -> Values
+richEnvToValues currentEnv re =
+  let vvs = values re
+      vms = flip mappingsToValues (mappings re)
+      vps = flip prefixesToValues (prefixes re)
+   in vvs <> vms currentEnv <> vps currentEnv

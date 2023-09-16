@@ -1,31 +1,26 @@
 module RichEnv (clearEnvironment, toEnvList, setRichEnv) where
 
-import RichEnv.Filters (varMaps, varPrefixes, varValues)
-import RichEnv.Setters (setPrefixedVars, setVarMapValues, setVarValueEnv, varValuesToEnvironment)
-import RichEnv.Types (Environment)
-import RichEnv.Types.RichEnv (RichEnv)
+import Data.Text qualified as T
+import RichEnv.Setters (mappingsToValues, prefixesToValues, richEnvToValues, valuesToEnv, valuesToEnvList)
+import RichEnv.Types (Environment, toEnvironment)
+import RichEnv.Types.RichEnv (RichEnv (..))
 import System.Environment (getEnvironment, unsetEnv)
 
 -- | Returns a list of environment variables abiding to the 'RichEnv' rules.
 toEnvList :: RichEnv -> IO Environment
-toEnvList re = varValuesToEnvironment . newEnvSet <$> getEnvironment
+toEnvList re = valuesToEnvList . newEnvSet . toEnvironment <$> getEnvironment
   where
-    vvs = varValues re
-    vms = flip setVarMapValues (varMaps re)
-    vps = flip setPrefixedVars (varPrefixes re)
+    vvs = values re
+    vms = flip mappingsToValues (mappings re)
+    vps = flip prefixesToValues (prefixes re)
     newEnvSet cEnv = vvs <> vms cEnv <> vps cEnv
 
 -- | Sets the environment variables available to the current process abiding to the 'RichEnv' rules.
 setRichEnv :: RichEnv -> IO ()
 setRichEnv re = do
-  currentEnv <- getEnvironment
+  currentEnv <- toEnvironment <$> getEnvironment
   clearEnvironment currentEnv
-  mapM_ setVarValueEnv (newEnvSet currentEnv)
-  where
-    vvs = varValues re
-    vms = flip setVarMapValues (varMaps re)
-    vps = flip setPrefixedVars (varPrefixes re)
-    newEnvSet cEnv = vvs <> vms cEnv <> vps cEnv
+  valuesToEnv (richEnvToValues currentEnv re)
 
 -- | Clears all environment variables of the current process.
 --
@@ -43,4 +38,4 @@ setRichEnv re = do
 -- >>> env' == [("FOO", "bar")]
 -- True
 clearEnvironment :: Environment -> IO ()
-clearEnvironment = mapM_ (unsetEnv . fst)
+clearEnvironment = mapM_ (unsetEnv . T.unpack . fst)
