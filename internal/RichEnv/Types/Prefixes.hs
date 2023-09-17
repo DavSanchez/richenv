@@ -1,3 +1,4 @@
+-- | This module contains the 'Prefixes' type, which is used to store environment variable name prefix mappings, and its typeclass instances.
 module RichEnv.Types.Prefixes (Prefixes (Prefixes, unPrefixes)) where
 
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
@@ -6,6 +7,7 @@ import Data.HashMap.Strict qualified as HM
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
+-- | A list of key-value pairs representing environment variable name prefix mappings. The internal representation is a 'HashMap Text [Text]', where the key is the final prefix and the value is the list of prefixes that will be replaced.
 newtype Prefixes = Prefixes {unPrefixes :: HM.HashMap Text [Text]}
   deriving stock (Eq, Show, Generic)
 

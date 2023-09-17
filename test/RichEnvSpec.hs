@@ -12,11 +12,10 @@ import Data.List (sort)
 import Data.Text qualified as T
 import Data.Yaml qualified as Yaml
 import GHC.Generics (Generic)
-import RichEnv (clearEnvironment, setRichEnv, toEnvList)
-import RichEnv.Types (Environment, fromEnvironment, toEnvironment)
+import RichEnv (clearEnvironment, setRichEnvFromCurrent, toEnvListFromCurrent)
+import RichEnv.Types (Environment, RichEnv (..), fromEnvironment, toEnvironment)
 import RichEnv.Types.Mappings (Mappings (..))
 import RichEnv.Types.Prefixes (Prefixes (..))
-import RichEnv.Types.RichEnv (RichEnv (..))
 import RichEnv.Types.Values (Values (..))
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, context, describe, it, shouldBe)
@@ -28,7 +27,7 @@ spec = describe "RichEnv ops" $ do
   context "setting environment" $ do
     it "set a single environment variable through RichEnv" $ do
       clearEnv
-      setRichEnv
+      setRichEnvFromCurrent
         RichEnv
           { values = Values $ HM.singleton "SOME" "var",
             mappings = mempty,
@@ -37,7 +36,7 @@ spec = describe "RichEnv ops" $ do
       testEnv [("SOME", "var")]
     it "set multiple environment variables through RichEnv" $ do
       clearEnv
-      setRichEnv
+      setRichEnvFromCurrent
         RichEnv
           { values = Values $ HM.fromList [("SOME", "var"), ("OTHER", "othervar")],
             mappings = mempty,
@@ -47,7 +46,7 @@ spec = describe "RichEnv ops" $ do
     it "remaps existing environment variables" $ do
       clearEnv
       setTestEnv exampleEnv
-      setRichEnv
+      setRichEnvFromCurrent
         RichEnv
           { mappings = Mappings $ HM.singleton "SOME" "FOO",
             prefixes = mempty,
@@ -57,7 +56,7 @@ spec = describe "RichEnv ops" $ do
     it "remaps prefixed variables" $ do
       clearEnv
       setTestEnv exampleEnv
-      setRichEnv
+      setRichEnvFromCurrent
         RichEnv
           { prefixes = Prefixes $ HM.singleton "NEW_" ["PREFIXED_"],
             mappings = mempty,
@@ -147,7 +146,7 @@ testEnv :: Environment -> Expectation
 testEnv expected = getEnvironment >>= (`shouldBe` sort expected) . sort . toEnvironment
 
 testEnvList :: Environment -> RichEnv -> Expectation
-testEnvList expected re = toEnvList re >>= (`shouldBe` sort expected) . sort
+testEnvList expected re = toEnvListFromCurrent re >>= (`shouldBe` sort expected) . sort
 
 newtype TestType = TestType
   { environ :: RichEnv
