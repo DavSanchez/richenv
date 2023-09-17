@@ -1,14 +1,23 @@
-module RichEnv (clearEnvironment, toEnvList, setRichEnv) where
+module RichEnv (clearEnvironment, toEnvList, setRichEnv, toEnvMap) where
 
+import Data.HashMap.Strict qualified as HM
+import Data.Text (Text)
 import Data.Text qualified as T
 import RichEnv.Setters (mappingsToValues, prefixesToValues, richEnvToValues, valuesToEnv, valuesToEnvList)
 import RichEnv.Types (Environment, toEnvironment)
-import RichEnv.Types.RichEnv (RichEnv (..))
+import RichEnv.Types.RichEnv (RichEnv (..), Values)
+import RichEnv.Types.Values (Values (unValues))
 import System.Environment (getEnvironment, unsetEnv)
 
 -- | Returns a list of environment variables abiding to the 'RichEnv' rules.
 toEnvList :: RichEnv -> IO Environment
-toEnvList re = valuesToEnvList . newEnvSet . toEnvironment <$> getEnvironment
+toEnvList re = valuesToEnvList <$> toEnvValues re
+
+toEnvMap :: RichEnv -> IO (HM.HashMap Text Text)
+toEnvMap re = unValues <$> toEnvValues re
+
+toEnvValues :: RichEnv -> IO Values
+toEnvValues re = newEnvSet . toEnvironment <$> getEnvironment
   where
     vvs = values re
     vms = flip mappingsToValues (mappings re)
