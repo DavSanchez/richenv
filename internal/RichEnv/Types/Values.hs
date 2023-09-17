@@ -1,3 +1,4 @@
+-- | This module contains the 'Values' type, which stores environment variable names and values, and its typeclass instances.
 module RichEnv.Types.Values (Values (Values, unValues)) where
 
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
@@ -6,6 +7,7 @@ import Data.HashMap.Strict qualified as HM
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
+-- | A list of key-value pairs representing environment variables. The internal representation is a 'HashMap Text Text', where the key is the variable name and the value is the variable value.
 newtype Values = Values {unValues :: HM.HashMap Text Text}
   deriving stock (Eq, Show, Generic)
 

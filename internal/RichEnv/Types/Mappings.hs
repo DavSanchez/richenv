@@ -1,3 +1,4 @@
+-- | This module contains the 'Mappings' type, which is used to store environment variable name mappings, and its typeclass instances.
 module RichEnv.Types.Mappings (Mappings (Mappings, unMappings)) where
 
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
@@ -6,6 +7,7 @@ import Data.HashMap.Strict qualified as HM
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
+-- | A list of key-value pairs representing environment variable name mappings. The internal representation is a 'HashMap Text Text', where the key is the final variable name and the value is the current one which will be replaced.
 newtype Mappings = Mappings {unMappings :: HM.HashMap Text Text}
   deriving stock (Eq, Show, Generic)
 
