@@ -8,7 +8,9 @@ Rich environment variable setup for Haskell
 
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 
-This package exposes a type that captures a set of rules that modify an existing environment variable set, be it a provided list of key-value pairs (list of tuples) or the system's environment variable set. The rules are applied in order, and each rule can be either a prefix, a mapping or a value. Prefixes take environment variable names and prepend a prefix to them, replacing existing prefixes (i.e. fist removing old prefix, then adding the new one) if desired. Mappings replace the name of the environment variable with a different one, and values create the environment variable with the provided value.
+This package exposes a type that captures a set of rules that modify an existing environment variable set, be it a provided list of key-value pairs (list of tuples) or the system's environment variable set.
+
+Each rule can be either a prefix, a mapping or a value. Prefixes take environment variable names and prepend a prefix to them, replacing existing prefixes (i.e. fist removing old prefix, then adding the new one) if desired. Mappings replace the name of the environment variable with a different one, and values create the environment variable with the provided value.
 
 ## Getting started
 
