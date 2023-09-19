@@ -2,10 +2,7 @@ module RichEnv.SettersSpec (spec) where
 
 import Data.HashMap.Strict qualified as HM
 import RichEnv.Setters (mappingsToValues, prefixesToValues)
-import RichEnv.Types (Environment)
-import RichEnv.Types.Mappings (Mappings (..))
-import RichEnv.Types.Prefixes (Prefixes (..))
-import RichEnv.Types.Values (Values (..))
+import RichEnv.Types (Environment, Mappings (..), Prefixes (..), Values (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 spec :: Spec

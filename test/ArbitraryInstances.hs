@@ -3,10 +3,7 @@
 module ArbitraryInstances () where
 
 import Data.HashMap.Strict qualified as HM
-import RichEnv.Types (RichEnv (..))
-import RichEnv.Types.Mappings (Mappings (..))
-import RichEnv.Types.Prefixes (Prefixes (..))
-import RichEnv.Types.Values (Values (..))
+import RichEnv.Types (Mappings (..), Prefixes (..), RichEnv (..), Values (..))
 import Test.QuickCheck (Arbitrary (arbitrary), Gen)
 import Test.QuickCheck.Instances.Text ()
 

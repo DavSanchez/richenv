@@ -116,12 +116,12 @@ library
     RichEnv
     RichEnv.Setters
     RichEnv.Types
+
+  -- Modules included in this library but not exported.
+  other-modules:
     RichEnv.Types.Mappings
     RichEnv.Types.Prefixes
     RichEnv.Types.Values
-
-  -- Modules included in this library but not exported.
-  -- other-modules:
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
