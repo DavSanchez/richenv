@@ -4,13 +4,10 @@
 -- * Mapping the name from one existing environment variable name to another (If there's an environment variable @__FOO=bar__@, a mapping @__(\"SOME\", \"FOO\")__@ will generate an environment variable definition @__SOME__@ with the contents of the variable @__FOO__@).
 -- * Mapping the prefixes of existing environment variables to a new prefix (If there's an environment variable @__FOO_VAR=bar__@, a prefix mapping @__(\"SOME\", [\"FOO\"])__@ will generate an environment variable definition @__SOME_VAR__@ with the contents of the variable @__FOO_VAR__@).
 module RichEnv
-  ( -- * Types
-    RichEnv (..),
+  ( RichEnv (..),
     Environment,
 
     -- * Environment transformations
-    fromEnvironment,
-    toEnvironment,
     toEnvList,
     toEnvMap,
 
@@ -27,8 +24,7 @@ import Data.HashMap.Strict qualified as HM
 import Data.Text (Text)
 import Data.Text qualified as T
 import RichEnv.Setters (mappingsToValues, prefixesToValues, richEnvToValues, valuesToEnv, valuesToEnvList)
-import RichEnv.Types (Environment, RichEnv (..), fromEnvironment, toEnvironment)
-import RichEnv.Types.Values (Values (unValues))
+import RichEnv.Types (Environment, RichEnv (..), Values (..), toEnvironment)
 import System.Environment (getEnvironment, unsetEnv)
 
 -- | Get a key-value list of environment variables processing the passed environment with the 'RichEnv' input.
