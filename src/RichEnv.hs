@@ -23,9 +23,8 @@ where
 
 import Data.HashMap.Strict qualified as HM
 import Data.Text (Text)
-import Data.Text qualified as T
 import RichEnv.Setters (richEnvToValues, valuesToEnv, valuesToEnvList)
-import RichEnv.Types (Environment, RichEnv (..), toEnvironment)
+import RichEnv.Types (Environment, RichEnv (..), fromEnvironment, toEnvironment)
 import RichEnv.Types.Values (Values (unValues))
 import System.Environment (getEnvironment, unsetEnv)
 
@@ -48,7 +47,7 @@ toEnvValues = richEnvToValues
 -- | Sets the environment variables available for the current process abiding to the 'RichEnv' rules.
 setRichEnv :: RichEnv -> Environment -> IO ()
 setRichEnv re env = do
-  clearEnvironment env
+  clearEnvironment $ fromEnvironment env
   valuesToEnv (richEnvToValues re env)
 
 -- | Sets the environment variables available for the current process by checking the current environment variables and applying the 'RichEnv' rules.
@@ -77,6 +76,6 @@ _toEnvValuesFromCurrent re = toEnvValues re . toEnvironment <$> getEnvironment
 
 -- | Clears all environment variables of the current process.
 clearEnvironment ::
-  Environment ->
+  [(String, String)] ->
   IO ()
-clearEnvironment = mapM_ (unsetEnv . T.unpack . fst)
+clearEnvironment = mapM_ (unsetEnv . fst)
