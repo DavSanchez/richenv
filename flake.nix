@@ -55,7 +55,9 @@
           # devenv = devenv.lib.mkShell {};
         };
         packages = {
-          default = pkgs.haskellPackages.callPackage ./default.nix {nativeBuildInputs = [pkgs.coreutils];};
+          default = (pkgs.haskellPackages.callPackage ./default.nix {}).overrideAttrs (final: prev: {
+            nativeBuildInputs = prev.nativeBuildInputs ++ [pkgs.coreutils];
+          });
         };
       }
     );
