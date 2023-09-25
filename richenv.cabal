@@ -160,10 +160,10 @@ test-suite richenv-test
     , aeson
     , bytestring            >=0.11   && <0.13
     , hspec                 >=2.10   && <2.12
+    , process               >=1.6    && <1.7
     , QuickCheck            >=2.14   && <2.15
     , quickcheck-instances  >=0.3.29 && <0.4
     , richenv
     , yaml                  >=0.11   && <0.12
 
-  -- , process
   build-tool-depends: hspec-discover:hspec-discover
