@@ -18,7 +18,7 @@ valuesToEnv = mapM_ (uncurry setEnv) . fromEnvironment . HM.toList . unValues
 
 -- | Takes a 'Values' object and transforms it into a list of key-value pairs representing environment variables.
 --
--- > valuesToEnvList = Data.HashMap.toList . unValues
+-- > valuesToEnvList = Data.HashMap.Strict.toList . unValues
 valuesToEnvList :: Values -> Environment
 valuesToEnvList = HM.toList . unValues
 
