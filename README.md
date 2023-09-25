@@ -95,6 +95,6 @@ main = do
   -- ...
 ```
 
-As mentioned before, instead of modifying the current process, you use `RichEnv` to spawn processes with custom environments (for example with [`System.Process.proc`](https://hackage.haskell.org/package/process/docs/System-Process.html#v:proc) and `CreateProcess`' [`env`](https://hackage.haskell.org/package/process/docs/System-Process.html#t:CreateProcess) field) defined with your rules, effectively controlling how the environment is forwarded from the current process to the spawned ones.
+As mentioned before, instead of modifying the current process, you use `RichEnv` to spawn processes with custom environments (for example with System.Process' [`proc`](https://hackage.haskell.org/package/process/docs/System-Process.html#v:proc) and [`CreateProcess`](https://hackage.haskell.org/package/process/docs/System-Process.html#t:CreateProcess)' `env` field) defined with your rules, effectively controlling how the environment is forwarded from the current process to the spawned ones.
 
 See the Hackage documentation and [the tests](./test/RichEnvSpec.hs) for more details and examples.
