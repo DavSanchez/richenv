@@ -21,7 +21,7 @@ The idea behind this library is that you can find a set of rules for setting env
 If your application uses a configuration file, for example in YAML format, you could add a new field to your config like this:
 
 ```yaml
-# Other configs ...
+# example.yaml
 env:
   values:
     VERBOSE: "true"
@@ -57,29 +57,44 @@ You can either provide a list of environment variables (normally of type `[(Text
 If you assume that there are no environment variables in the current process, you could use `RichEnv` to get a list of environment variables like this:
 
 ```haskell
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 
-richEnv :: RichEnv
-richEnv = RichEnv
-      { prefixes = Prefixes $ HM.singleton "NEW_" ["PREFIXED_"],
-        mappings = Mappings $ HM.singleton "SOME" "FOO",
-        values = Values $ HM.singleton "OTHER" "othervar"
-      }
+module Main where
+
+import Data.Aeson (FromJSON, ToJSON)
+import Data.Yaml (decodeFileEither)
+import Data.Yaml.Aeson (ParseException)
+import GHC.Generics (Generic)
+import RichEnv (RichEnv (..), clearEnvironment, setRichEnvFromCurrent)
+import System.Environment (getEnvironment, setEnv)
+
+newtype SomeConfig = SomeConfig {env :: RichEnv} deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 main :: IO ()
 main = do
-  mapM_ (uncurry setEnv) [("FOO", "bar"), ("BAZ", "qux"), ("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
-  envList <- toEnvList richEnv
+  decodedYaml <- decodeFileEither "./example.yaml" :: IO (Either ParseException SomeConfig)
+  case decodedYaml of
+    Left err -> error $ show err
+    Right rEnv -> do
+      -- Successfully parsed. Now we can use the RichEnv
+      -- 1. clear the environment of the current process
+      getEnvironment >>= clearEnvironment
+      -- 2. Set an example environment for the current process
+      mapM_ (uncurry setEnv) [("FOO", "bar"), ("OLDNAME", "qux"), ("PREFIXED_VAR", "content"), ("OTHER_PREFIXED_VAR2", "content2")]
+      -- 3. modify the current environment with the RichEnv
+      setRichEnvFromCurrent (env rEnv)
+      -- 4. check the environment again
+      getEnvironment >>= print
+
+-- printedOutput =
+--   [ ("OTHER_NEW_PREFIX_VAR2", "content2"),
+--     ("VERBOSE", "true"),
+--     ("NEWNAME", "qux"),
+--     ("NEW_PREFIX_VAR", "content"),
+--     ("NEW_PREFIX_VAR2", "content2")
+--   ]
   -- ...
 ```
 
-And then call a process providing a generated custom environment doing something like:
-
-```haskell
-  -- ... later in the `main` function... 
-  let envProcess = (proc "env" []) {env = Just (fromEnvironment envList), std_out = CreatePipe}
-  out <- lines <$> readCreateProcess envProcess mempty
-  -- ... or if inside a test with HSpec
-  sort out `shouldBe` sort ["NEW_VAR=content", "NEW_VAR2=content2", "OTHER=othervar", "SOME=bar"]
-```
-
-See the documentations (and [the tests](./test/RichEnvSpec.hs)) for more details.
+Instead of modifying the current process, you could spawn processes with custom environments (for example with [`System.Process.proc`](https://hackage.haskell.org/package/process-1.6.18.0/docs/System-Process.html#v:proc) and `CreateProcess`' [`env`](https://hackage.haskell.org/package/process-1.6.18.0/docs/System-Process.html#t:CreateProcess) field) by providing a list defined with the `RichEnv` rules. See the Hackage documentation and [the tests](./test/RichEnvSpec.hs) for more details.
