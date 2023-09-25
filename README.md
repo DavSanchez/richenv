@@ -2,7 +2,9 @@
 
 [![Tests](https://github.com/DavSanchez/richenv/actions/workflows/tests.yml/badge.svg)](https://github.com/DavSanchez/richenv/actions/workflows/tests.yml)
 ![Hackage Version](https://img.shields.io/hackage/v/:richenv?style=round-square&logo=haskell)
-[![nixpkgs unstable](https://img.shields.io/badge/nixpkgs-unstable-blue.svg?style=round-square&logo=NixOS&logoColor=white)](https://search.nixos.org/packages?size=1&show=richenv)
+<!-- [![richenv on Stackage LTS](https://stackage.org/package/richenv/badge/lts)](https://stackage.org/lts/package/richenv)
+[![richenv on Stackage Nightly](https://stackage.org/package/richenv/badge/nightly)](https://stackage.org/nightly/package/richenv)
+[![nixpkgs unstable](https://img.shields.io/badge/nixpkgs-unstable-blue.svg?style=round-square&logo=NixOS&logoColor=white)](https://search.nixos.org/packages?size=1&show=richenv) -->
 
 Rich environment variable setup for Haskell
 
