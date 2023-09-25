@@ -1,5 +1,5 @@
 -- | This module contains the 'Prefixes' type, which is used to store environment variable name prefix mappings, and its typeclass instances.
-module RichEnv.Types.Prefixes (Prefixes (Prefixes, unPrefixes)) where
+module RichEnv.Types.Prefixes (Prefixes (Prefixes, unPrefixes), fromList) where
 
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
 import Data.Aeson.Types (Parser)
@@ -26,3 +26,7 @@ instance Semigroup Prefixes where
 instance Monoid Prefixes where
   mempty :: Prefixes
   mempty = Prefixes mempty
+
+-- | Build a 'Prefixes' object from a list of key-value pairs.
+fromList :: [(Text, [Text])] -> Prefixes
+fromList = Prefixes . HM.fromList
