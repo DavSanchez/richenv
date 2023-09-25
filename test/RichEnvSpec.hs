@@ -12,8 +12,8 @@ import Data.List (sort)
 import Data.Text qualified as T
 import Data.Yaml qualified as Yaml
 import GHC.Generics (Generic)
-import RichEnv (clearEnvironment, defaultRichEnv, setRichEnvFromCurrent, toEnvListFromCurrent)
-import RichEnv.Types (Environment, Mappings (Mappings), Prefixes (Prefixes), RichEnv (..), Values (Values), fromEnvironment, toEnvironment)
+import RichEnv (clearEnvironment, setRichEnvFromCurrent, toEnvListFromCurrent)
+import RichEnv.Types (Environment, Mappings (Mappings), Prefixes (Prefixes), RichEnv (..), Values (Values), defaultRichEnv, fromEnvironment, toEnvironment)
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, context, describe, it, shouldBe)
 import Test.Hspec.QuickCheck (prop)

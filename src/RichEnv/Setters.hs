@@ -76,6 +76,27 @@ toValues :: Environment -> Values
 toValues = Values . HM.fromList
 
 -- | Takes an environment variable list and a 'RichEnv' object and generates a 'Values' object.
+--
+-- >>> richEnvToValues RichEnv.Types.defaultRichEnv [("FOO", "bar"), ("SOME", "thing")]
+-- Values {unValues = fromList []}
+--
+-- >>> import RichEnv.Types.Values as V
+-- >>> let richEnvValue = RichEnv.Types.defaultRichEnv { values = V.fromList [("OTHER", "var")]}
+-- >>> let envList = [("FOO", "bar"), ("SOME", "thing")]
+-- >>> richEnvToValues richEnvValue envList
+-- Values {unValues = fromList [("OTHER","var")]}
+--
+-- >>> import RichEnv.Types.Mappings as M
+-- >>> let richEnvValue = RichEnv.Types.defaultRichEnv { mappings = M.fromList [("SOME", "FOO")]}
+-- >>> let envList = [("FOO", "bar"), ("SOME", "thing"), ("SOME", "other")]
+-- >>> richEnvToValues richEnvValue envList
+-- Values {unValues = fromList [("SOME","bar")]}
+--
+-- >>> import RichEnv.Types.Prefixes as P
+-- >>> let richEnvValue = RichEnv.Types.defaultRichEnv { prefixes = P.fromList [("NEW_", ["PREFIXED_"])]}
+-- >>> let envList = [("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
+-- >>> richEnvToValues richEnvValue envList
+-- Values {unValues = fromList [("NEW_VAR","content"),("NEW_VAR2","content2")]}
 richEnvToValues :: RichEnv -> Environment -> Values
 richEnvToValues re currentEnv =
   let vvs = values re

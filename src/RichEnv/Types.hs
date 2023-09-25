@@ -2,6 +2,7 @@
 module RichEnv.Types
   ( -- * Types
     RichEnv (..),
+    defaultRichEnv,
     Environment,
     Mappings (..),
     Values (..),
@@ -52,3 +53,7 @@ instance Semigroup RichEnv where
 instance Monoid RichEnv where
   mempty :: RichEnv
   mempty = RichEnv mempty mempty mempty
+
+-- | Default 'RichEnv' value. With everything empty.
+defaultRichEnv :: RichEnv
+defaultRichEnv = mempty

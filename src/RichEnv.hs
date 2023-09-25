@@ -6,7 +6,6 @@
 module RichEnv
   ( -- * Types
     RichEnv (..),
-    defaultRichEnv,
     Environment,
 
     -- * Environment transformations
@@ -30,10 +29,6 @@ import RichEnv.Types (Environment, RichEnv (..), toEnvironment)
 import RichEnv.Types.Values (Values (unValues))
 import System.Environment (getEnvironment, unsetEnv)
 
--- | Default 'RichEnv' value. With everything empty.
-defaultRichEnv :: RichEnv
-defaultRichEnv = mempty
-
 -- | Get a key-value list of environment variables processing the passed environment with the 'RichEnv' input.
 --
 -- > toEnvList re env = valuesToEnvList (toEnvValues re env)
@@ -47,27 +42,6 @@ toEnvMap :: RichEnv -> Environment -> HM.HashMap Text Text
 toEnvMap re = unValues . toEnvValues re
 
 -- | Builds a 'Values' object from the 'RichEnv' input and a list of environment variables.
---
--- >>> toEnvValues defaultRichEnv [("FOO", "bar"), ("SOME", "thing")]
--- Values {unValues = fromList []}
---
--- >>> import qualified RichEnv.Types.Values as V
--- >>> let richEnvValue = defaultRichEnv { values = V.fromList [("OTHER", "var")]}
--- >>> let envList = [("FOO", "bar"), ("SOME", "thing")]
--- >>> toEnvValues richEnvValue envList
--- Values {unValues = fromList [("OTHER","var")]}
---
--- >>> import qualified RichEnv.Types.Mappings as M
--- >>> let richEnvValue = defaultRichEnv { mappings = M.fromList [("SOME", "FOO")]}
--- >>> let envList = [("FOO", "bar"), ("SOME", "thing"), ("SOME", "other")]
--- >>> toEnvValues richEnvValue envList
--- Values {unValues = fromList [("SOME","bar")]}
---
--- >>> import qualified RichEnv.Types.Prefixes as P
--- >>> let richEnvValue = defaultRichEnv { prefixes = P.fromList [("NEW_", ["PREFIXED_"])]}
--- >>> let envList = [("PREFIXED_VAR", "content"), ("PREFIXED_VAR2", "content2")]
--- >>> toEnvValues richEnvValue envList
--- Values {unValues = fromList [("NEW_VAR","content"),("NEW_VAR2","content2")]}
 toEnvValues :: RichEnv -> Environment -> Values
 toEnvValues = richEnvToValues
 
