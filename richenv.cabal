@@ -66,6 +66,7 @@ source-repository head
 
 common common-options
   build-depends:
+    , aeson                 >=2.1.0  && <2.3
     , base                  >=4.14   && <5
     , text                  >=2.0    && <3
     , unordered-containers  >=0.2.19 && <0.3
@@ -111,32 +112,25 @@ library
   import:          common-options
 
   -- Modules exported by the library.
-  exposed-modules: RichEnv
+  exposed-modules:
+    RichEnv
+    RichEnv.Setters
+    RichEnv.Types
 
   -- Modules included in this library but not exported.
-  -- other-modules:
+  other-modules:
+    RichEnv.Types.Mappings
+    RichEnv.Types.Prefixes
+    RichEnv.Types.Values
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:   richenv-internal
+  -- build-depends:
 
   -- Directories containing source files.
   hs-source-dirs:  src
-
-library richenv-internal
-  import:           common-options
-  exposed-modules:
-    RichEnv.Setters
-    RichEnv.Types
-    RichEnv.Types.Mappings
-    RichEnv.Types.Prefixes
-    RichEnv.Types.Values
-
-  build-depends:    aeson >=2.1.0 && <2.3
-  hs-source-dirs:   internal
-  default-language: Haskell2010
 
 test-suite richenv-test
   -- Import common options.
@@ -169,7 +163,6 @@ test-suite richenv-test
     , QuickCheck            >=2.14   && <2.15
     , quickcheck-instances  >=0.3.29 && <0.4
     , richenv
-    , richenv-internal
     , yaml                  >=0.11   && <0.12
 
   -- , process

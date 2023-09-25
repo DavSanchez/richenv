@@ -12,7 +12,6 @@ mkDerivation {
     unordered-containers yaml
   ];
   testToolDepends = [ hspec-discover ];
-  doHaddock = false;
   homepage = "https://github.com/DavSanchez/richenv";
   description = "Rich environment variable setup for Haskell";
   license = lib.licenses.mit;

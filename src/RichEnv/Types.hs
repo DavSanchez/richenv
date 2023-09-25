@@ -1,14 +1,26 @@
 -- | This module contains the basic types used by the library and their typeclass instances.
-module RichEnv.Types (RichEnv (..), Environment, toEnvironment, fromEnvironment) where
+module RichEnv.Types
+  ( -- * Types
+    RichEnv (..),
+    Environment,
+    Mappings (..),
+    Values (..),
+    Prefixes (..),
+
+    -- * Environment transformations
+    toEnvironment,
+    fromEnvironment,
+  )
+where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Bifunctor (bimap)
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Generics (Generic)
-import RichEnv.Types.Mappings (Mappings)
-import RichEnv.Types.Prefixes (Prefixes)
-import RichEnv.Types.Values (Values)
+import RichEnv.Types.Mappings (Mappings (..))
+import RichEnv.Types.Prefixes (Prefixes (..))
+import RichEnv.Types.Values (Values (..))
 
 -- | A list of key-value pairs representing environment variables.
 type Environment = [(Text, Text)]
