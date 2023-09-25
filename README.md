@@ -25,15 +25,13 @@ If your application uses a configuration file, for example in YAML format, you c
 env:
   values:
     VERBOSE: "true"
-    FOO: bar
   mappings:
     NEWNAME: OLDNAME
-    NEW_NAME_2: OLD_NAME_2
   prefixes:
     NEW_PREFIX_:
-      - OLD_PREFIX_
-      - OTHER_OLD_PREFIX_
-    OTHER_NEW_PREFIX_: [OTHER_OLD_PREFIX_]
+      - PREFIXED_
+      - OTHER_PREFIXED_
+    OTHER_NEW_PREFIX_: [OTHER_PREFIXED_]
 # More configs ...
 ```
 
@@ -54,7 +52,7 @@ You can either provide a list of environment variables (normally of type `[(Text
 
 ### Code example
 
-If you assume that there are no environment variables in the current process, you could use `RichEnv` to get a list of environment variables like this:
+Assuming you are using the previous YAML example (and a controlled set of environment variables for the current process, see steps 1 and 2 below), you could use `RichEnv` modify the environment variables like this:
 
 ```haskell
 {-# LANGUAGE DeriveAnyClass #-}
@@ -97,4 +95,6 @@ main = do
   -- ...
 ```
 
-Instead of modifying the current process, you could spawn processes with custom environments (for example with [`System.Process.proc`](https://hackage.haskell.org/package/process-1.6.18.0/docs/System-Process.html#v:proc) and `CreateProcess`' [`env`](https://hackage.haskell.org/package/process-1.6.18.0/docs/System-Process.html#t:CreateProcess) field) by providing a list defined with the `RichEnv` rules. See the Hackage documentation and [the tests](./test/RichEnvSpec.hs) for more details.
+As mentioned before, instead of modifying the current process, you use `RichEnv` to spawn processes with custom environments (for example with System.Process' [`proc`](https://hackage.haskell.org/package/process/docs/System-Process.html#v:proc) and [`CreateProcess`](https://hackage.haskell.org/package/process/docs/System-Process.html#t:CreateProcess)' `env` field) defined with your rules, effectively controlling how the environment is forwarded from the current process to the spawned ones.
+
+See the Hackage documentation and [the tests](./test/RichEnvSpec.hs) for more details and examples.

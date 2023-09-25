@@ -165,5 +165,5 @@ test-suite richenv-test
     , richenv
     , yaml                  >=0.11   && <0.12
 
-  -- , process
+  -- , process               >=1.6    && <1.7
   build-tool-depends: hspec-discover:hspec-discover
