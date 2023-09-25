@@ -1,15 +1,13 @@
 # RichEnv
 
-<p align="center">
-
 [![Tests](https://github.com/DavSanchez/richenv/actions/workflows/tests.yml/badge.svg)](https://github.com/DavSanchez/richenv/actions/workflows/tests.yml)
+
 [![Hackage Version](https://img.shields.io/hackage/v/richenv)](https://hackage.haskell.org/package/richenv)
 [![richenv on Stackage Nightly](https://stackage.org/package/richenv/badge/nightly)](https://stackage.org/nightly/package/richenv)
 [![richenv on Stackage LTS](https://stackage.org/package/richenv/badge/lts)](https://stackage.org/lts/package/richenv)
+
 [![nixpkgs unstable](https://img.shields.io/badge/nixpkgs-unstable-blue.svg?style=round-square&logo=NixOS&logoColor=white)](https://search.nixos.org/packages?size=1&show=richenv&channel=unstable)
 [![nixpkgs stable](https://img.shields.io/badge/nixpkgs-stable-blue.svg?style=round-square&logo=NixOS&logoColor=white)](https://search.nixos.org/packages?size=1&show=richenv)
-
-</p>
 
 Rich environment variable setup for Haskell
 
