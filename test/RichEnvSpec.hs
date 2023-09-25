@@ -5,15 +5,17 @@ import Control.Exception (displayException)
 import Data.Aeson qualified as JSON
 import Data.ByteString qualified as B
 import Data.ByteString.Char8 qualified as C8
-import Data.HashMap.Strict qualified as HM
 import Data.List (sort)
 -- import System.Process (CreateProcess (env, std_out), StdStream (CreatePipe), proc, readCreateProcess)
 
 import Data.Text qualified as T
 import Data.Yaml qualified as Yaml
 import GHC.Generics (Generic)
-import RichEnv (clearEnvironment, setRichEnvFromCurrent, toEnvListFromCurrent)
-import RichEnv.Types (Environment, Mappings (..), Prefixes (..), RichEnv (..), Values (..), fromEnvironment, toEnvironment)
+import RichEnv (clearEnvironment, defaultRichEnv, setRichEnvFromCurrent, toEnvListFromCurrent)
+import RichEnv.Types (Environment, RichEnv (..), fromEnvironment, toEnvironment)
+import RichEnv.Types.Mappings qualified as M
+import RichEnv.Types.Prefixes qualified as P
+import RichEnv.Types.Values qualified as V
 import System.Environment (getEnvironment, setEnv)
 import Test.Hspec (Expectation, Spec, context, describe, it, shouldBe)
 import Test.Hspec.QuickCheck (prop)
@@ -26,7 +28,7 @@ spec = describe "RichEnv ops" $ do
       clearEnv
       setRichEnvFromCurrent
         RichEnv
-          { values = Values $ HM.singleton "SOME" "var",
+          { values = V.fromList [("SOME", "var")],
             mappings = mempty,
             prefixes = mempty
           }
@@ -34,30 +36,24 @@ spec = describe "RichEnv ops" $ do
     it "set multiple environment variables through RichEnv" $ do
       clearEnv
       setRichEnvFromCurrent
-        RichEnv
-          { values = Values $ HM.fromList [("SOME", "var"), ("OTHER", "othervar")],
-            mappings = mempty,
-            prefixes = mempty
+        defaultRichEnv
+          { values = V.fromList [("SOME", "var"), ("OTHER", "othervar")]
           }
       testEnv [("SOME", "var"), ("OTHER", "othervar")]
     it "remaps existing environment variables" $ do
       clearEnv
       setTestEnv exampleEnv
       setRichEnvFromCurrent
-        RichEnv
-          { mappings = Mappings $ HM.singleton "SOME" "FOO",
-            prefixes = mempty,
-            values = mempty
+        defaultRichEnv
+          { mappings = M.fromList [("SOME", "FOO")]
           }
       testEnv [("SOME", "bar")]
     it "remaps prefixed variables" $ do
       clearEnv
       setTestEnv exampleEnv
       setRichEnvFromCurrent
-        RichEnv
-          { prefixes = Prefixes $ HM.singleton "NEW_" ["PREFIXED_"],
-            mappings = mempty,
-            values = mempty
+        defaultRichEnv
+          { prefixes = P.fromList [("NEW_", ["PREFIXED_"])]
           }
       testEnv [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
   context "getting the environment variable list" $ do
@@ -66,20 +62,16 @@ spec = describe "RichEnv ops" $ do
       setTestEnv exampleEnv
       testEnvList
         [("SOME", "bar")]
-        RichEnv
-          { mappings = Mappings $ HM.singleton "SOME" "FOO",
-            prefixes = mempty,
-            values = mempty
+        defaultRichEnv
+          { mappings = M.fromList [("SOME", "FOO")]
           }
     it "gets the environment variable list with prefixes" $ do
       clearEnv
       setTestEnv exampleEnv
       testEnvList
         [("NEW_VAR", "content"), ("NEW_VAR2", "content2")]
-        ( RichEnv
-            { prefixes = Prefixes $ HM.singleton "NEW_" ["PREFIXED_"],
-              mappings = mempty,
-              values = mempty
+        ( defaultRichEnv
+            { prefixes = P.fromList [("NEW_", ["PREFIXED_"])]
             }
         )
 

@@ -17,10 +17,15 @@ valuesToEnv :: Values -> IO ()
 valuesToEnv = mapM_ (uncurry setEnv) . fromEnvironment . HM.toList . unValues
 
 -- | Takes a 'Values' object and transforms it into a list of key-value pairs representing environment variables.
+--
+-- > valuesToEnvList = Data.HashMap.toList . unValues
 valuesToEnvList :: Values -> Environment
 valuesToEnvList = HM.toList . unValues
 
 -- | Takes an environment variable list and all the name mappings and prepares a set of environment variables according to the RichEnv rules.
+--
+-- >>> mappingsToValues [("FOO", "bar"), ("SOME", "thing")] (Mappings $ HM.fromList [("OTHER", "FOO")])
+-- Values {unValues = fromList [("OTHER","bar")]}
 mappingsToValues :: Environment -> Mappings -> Values
 mappingsToValues _ (Mappings m) | null m = mempty
 mappingsToValues currentEnv m =
@@ -32,6 +37,8 @@ mappingsToValues currentEnv m =
    in Values $ HM.foldrWithKey' mappingsToValues' mempty mappings'
 
 -- | Takes an environment variable list and all the prefix mappings and prepares a set of environment variables according to the 'RichEnv' rules.
+--
+-- >>> prefixesToValues [("FOO", "bar"), ("SOME", "thing")] (Prefixes $ HM.fromList [("OTHER", ["FOO"])])
 prefixesToValues :: Environment -> Prefixes -> Values
 prefixesToValues _ (Prefixes p) | null p = mempty
 prefixesToValues currentEnv p =
@@ -68,8 +75,8 @@ toValues :: Environment -> Values
 toValues = Values . HM.fromList
 
 -- | Takes an environment variable list and a 'RichEnv' object and generates a 'Values' object.
-richEnvToValues :: Environment -> RichEnv -> Values
-richEnvToValues currentEnv re =
+richEnvToValues :: RichEnv -> Environment -> Values
+richEnvToValues re currentEnv =
   let vvs = values re
       vms = flip mappingsToValues (mappings re)
       vps = flip prefixesToValues (prefixes re)

@@ -1,5 +1,5 @@
 -- | This module contains the 'Mappings' type, which is used to store environment variable name mappings, and its typeclass instances.
-module RichEnv.Types.Mappings (Mappings (Mappings, unMappings)) where
+module RichEnv.Types.Mappings (Mappings (Mappings, unMappings), fromList) where
 
 import Data.Aeson (FromJSON (parseJSON), Options (unwrapUnaryRecords), ToJSON (toJSON), Value, defaultOptions, genericParseJSON)
 import Data.Aeson.Types (Parser)
@@ -26,3 +26,7 @@ instance Semigroup Mappings where
 instance Monoid Mappings where
   mempty :: Mappings
   mempty = Mappings mempty
+
+-- | Build a 'Mappings' object from a list of key-value pairs.
+fromList :: [(Text, Text)] -> Mappings
+fromList = Mappings . HM.fromList
