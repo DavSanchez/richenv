@@ -23,11 +23,10 @@
 
       perSystem = {
         config,
-        inputs',
         pkgs,
         ...
       }: let
-        haskell = pkgs.haskell.packages.ghc982;
+        haskell = pkgs.haskellPackages;
       in {
         pre-commit = {
           check.enable = true;
