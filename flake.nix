@@ -3,32 +3,41 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    devenv.url = "github:cachix/devenv";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    git-hooks.url = "github:cachix/git-hooks.nix";
+    haskell-flake.url = "github:srid/haskell-flake";
   };
 
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    pre-commit-hooks,
-    flake-utils,
-    devenv,
-  }:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {inherit system;};
-        haskell = pkgs.haskellPackages; # Replaceable with pkgs.haskell.packages.ghc96 or similar
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [
+        inputs.git-hooks.flakeModule
+      ];
+
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+
+      perSystem = {
+        config,
+        inputs',
+        pkgs,
+        ...
+      }: let
+        haskell = pkgs.haskell.packages.ghc982;
       in {
-        checks = {
-          pre-commit-check = pre-commit-hooks.lib.${system}.run {
-            src = ./.;
+        pre-commit = {
+          check.enable = true;
+          settings = {
             hooks = {
               actionlint.enable = true;
-              alejandra.enable = true;
+              alejandra = {
+                enable = true;
+                excludes = ["default.nix"];
+              };
               cabal-fmt.enable = true;
               cabal2nix.enable = true;
               convco.enable = true;
@@ -38,26 +47,25 @@
               # yamllint.enable = true;
               # hunspell.enable = true;
             };
-            settings = {
-              alejandra.exclude = ["default.nix"];
-            };
           };
         };
-        devShells = {
-          default = pkgs.mkShell {
-            inherit (self.checks.${system}.pre-commit-check) shellHook;
-            buildInputs = with haskell; [
-              ghc
-              cabal-install
-              haskell-language-server
-              hspec-discover
-            ];
-          };
-          # devenv = devenv.lib.mkShell {};
+
+        devShells.default = pkgs.mkShell {
+          shellHook = ''
+            ${config.pre-commit.installationScript}
+            echo 1>&2 "Welcome to the development shell!"
+          '';
+          nativeBuildInputs = config.pre-commit.settings.enabledPackages;
+
+          buildInputs = with haskell; [
+            ghc
+            cabal-install
+            haskell-language-server
+            hspec-discover
+          ];
         };
-        packages = {
-          default = haskell.callPackage ./default.nix {};
-        };
-      }
-    );
+
+        packages.default = haskell.callPackage ./default.nix {};
+      };
+    };
 }
