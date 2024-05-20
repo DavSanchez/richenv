@@ -4,7 +4,7 @@
 }:
 mkDerivation {
   pname = "richenv";
-  version = "0.1.0.2";
+  version = "0.1.0.3";
   src = ./.;
   libraryHaskellDepends = [ aeson base text unordered-containers ];
   testHaskellDepends = [
