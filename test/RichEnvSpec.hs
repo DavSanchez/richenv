@@ -1,14 +1,14 @@
 module RichEnvSpec (spec) where
 
 import ArbitraryInstances ()
-import Control.Exception (displayException)
 import Data.Aeson qualified as JSON
 import Data.ByteString qualified as B
 import Data.ByteString.Char8 qualified as C8
 import Data.HashMap.Strict qualified as HM
 import Data.List (sort)
 import Data.Text qualified as T
-import Data.Yaml qualified as Yaml
+import Data.YAML (Pos)
+import Data.YAML.Aeson qualified as Yaml
 import GHC.Generics (Generic)
 import RichEnv (clearEnvironment, setRichEnvFromCurrent, toEnvListFromCurrent)
 import RichEnv.Types (Environment, Mappings (Mappings), Prefixes (Prefixes), RichEnv (..), Values (Values), defaultRichEnv, fromEnvironment, toEnvironment)
@@ -75,9 +75,9 @@ spec = describe "RichEnv ops" $ do
   context "working with YAML" $ it "parses a YAML file into expected results" $ do
     clearEnv
     setTestEnv fileTestsBaseEnv
-    let res = Yaml.decodeEither' yamlTestCase :: Either Yaml.ParseException TestType
+    let res = Yaml.decode1Strict yamlTestCase
     case res of
-      Left err -> fail $ show err
+      Left err -> fail $ "Parse failed. State: " <> show err
       Right actual -> testEnvList fileTestsCaseExpected (environ actual)
 
   context "working with JSON" $ it "parses a JSON file into expected results" $ do
@@ -90,10 +90,11 @@ spec = describe "RichEnv ops" $ do
 
   context "invariants" $ do
     prop "parsing YAML from and to a RichEnv should end in the original value" $ \re -> do
-      let yaml = Yaml.encode re
-          res = Yaml.decodeEither' yaml :: Either Yaml.ParseException RichEnv
+      let yaml = Yaml.encode1Strict re
+      C8.writeFile "./testcase.yaml" yaml
+      let res = Yaml.decode1Strict yaml :: Either (Pos, String) RichEnv
        in case res of
-            Left err -> fail $ displayException err
+            Left err -> fail $ "Parse failed. State: " <> show err
             Right actual -> do
               actual `shouldBe` re
     prop "parsing JSON from and to a RichEnv should end in the original value" $ \re -> do
