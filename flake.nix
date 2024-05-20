@@ -10,8 +10,9 @@
 
   outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = [
-        inputs.git-hooks.flakeModule
+      imports = with inputs; [
+        git-hooks.flakeModule
+        # haskell-flake.flakeModule
       ];
 
       systems = [
@@ -25,9 +26,7 @@
         config,
         pkgs,
         ...
-      }: let
-        haskell = pkgs.haskellPackages;
-      in {
+      }: {
         pre-commit = {
           check.enable = true;
           settings = {
@@ -43,8 +42,6 @@
               ormolu.enable = true;
               hlint.enable = true;
               hpack.enable = true;
-              # yamllint.enable = true;
-              # hunspell.enable = true;
             };
           };
         };
@@ -56,7 +53,7 @@
           '';
           nativeBuildInputs = config.pre-commit.settings.enabledPackages;
 
-          buildInputs = with haskell; [
+          buildInputs = with pkgs.haskellPackages; [
             ghc
             cabal-install
             haskell-language-server
@@ -64,7 +61,14 @@
           ];
         };
 
-        packages.default = haskell.callPackage ./default.nix {};
+        packages = {
+          default = pkgs.haskellPackages.callPackage ./default.nix {};
+
+          richenv-ghc94 = pkgs.haskell.packages.ghc94.callPackage ./default.nix {};
+          richenv-ghc96 = pkgs.haskell.packages.ghc96.callPackage ./default.nix {};
+          richenv-ghc98 = pkgs.haskell.packages.ghc98.callPackage ./default.nix {};
+          # richenv-ghc910 = pkgs.haskell.packages.ghc910.callPackage ./default.nix {};
+        };
       };
     };
 }
