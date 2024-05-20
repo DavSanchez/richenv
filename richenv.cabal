@@ -21,7 +21,7 @@ name:            richenv
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         0.1.0.1
+version:         0.1.0.2
 
 -- A short (one-line) description of the package.
 synopsis:        Rich environment variable setup for Haskell
@@ -160,10 +160,11 @@ test-suite richenv-test
     , aeson
     , bytestring            >=0.11   && <0.13
     , hspec                 >=2.10   && <2.12
+    , HsYAML
+    , HsYAML-aeson
     , QuickCheck            >=2.14   && <2.15
     , quickcheck-instances  >=0.3.29 && <0.4
     , richenv
-    , yaml                  >=0.11   && <0.12
 
   -- , process               >=1.6    && <1.7
   build-tool-depends: hspec-discover:hspec-discover
