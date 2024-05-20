@@ -58,7 +58,7 @@ extra-doc-files:
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 -- extra-source-files:
 
-tested-with:     GHC ==9.2.8 || ==9.4.6 || ==9.6.2
+tested-with:     GHC ==9.4.8 || ==9.6.5 || ==9.8.2 || ==9.10.1
 
 source-repository head
   type:     git
