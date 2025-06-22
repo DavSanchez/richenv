@@ -62,7 +62,6 @@
         packages = {
           default = pkgs.haskellPackages.callPackage ./default.nix {};
 
-          richenv-ghc94 = pkgs.haskell.packages.ghc94.callPackage ./default.nix {};
           richenv-ghc96 = pkgs.haskell.packages.ghc96.callPackage ./default.nix {};
           richenv-ghc98 = pkgs.haskell.packages.ghc98.callPackage ./default.nix {};
           richenv-ghc910 = pkgs.haskell.packages.ghc910.callPackage ./default.nix {};

@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        ghc: [ghc94, ghc96, ghc98, ghc910, ghc912]
+        ghc: [ghc96, ghc98, ghc910, ghc912]
     steps:
       - uses: actions/checkout@v4
 
