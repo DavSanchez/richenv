@@ -76,21 +76,6 @@
         "type": "github"
       }
     },
-    "haskell-flake": {
-      "locked": {
-        "lastModified": 1716088826,
-        "narHash": "sha256-jLNcBHylm1J/Q1Vz7Swsao5J8lZAhQKKSUNHl+r1K7k=",
-        "owner": "srid",
-        "repo": "haskell-flake",
-        "rev": "440b0f1d69c1b9bb1831c29b573cf3d2e50a2c9c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "srid",
-        "repo": "haskell-flake",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1710765496,
@@ -155,7 +140,6 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
-        "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs_2"
       }
     }

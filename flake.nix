@@ -5,14 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     git-hooks.url = "github:cachix/git-hooks.nix";
-    haskell-flake.url = "github:srid/haskell-flake";
   };
 
   outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = with inputs; [
         git-hooks.flakeModule
-        # haskell-flake.flakeModule
       ];
 
       systems = [
@@ -67,7 +65,8 @@
           richenv-ghc94 = pkgs.haskell.packages.ghc94.callPackage ./default.nix {};
           richenv-ghc96 = pkgs.haskell.packages.ghc96.callPackage ./default.nix {};
           richenv-ghc98 = pkgs.haskell.packages.ghc98.callPackage ./default.nix {};
-          # richenv-ghc910 = pkgs.haskell.packages.ghc910.callPackage ./default.nix {};
+          richenv-ghc910 = pkgs.haskell.packages.ghc910.callPackage ./default.nix {};
+          richenv-ghc912 = pkgs.haskell.packages.ghc912.callPackage ./default.nix {};
         };
       };
     };

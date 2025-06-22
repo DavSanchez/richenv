@@ -21,7 +21,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable cache for Nix
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Run Nix checks
         run: nix flake check
@@ -37,86 +37,31 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v27
+        uses: DeterminateSystems/determinate-nix-action@main
 
       - name: Enable cache for Nix
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build default package with Nix
         run: nix build
 
-  ghc-94:
-    name: "Build & test with Nix (GHC 9.4)"
+  ghc-versions:
+    name: "Build & test with Nix (${{ matrix.ghc }})"
     needs: [checks]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        ghc: [ghc94, ghc96, ghc98, ghc910, ghc912]
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v27
+        uses: DeterminateSystems/determinate-nix-action@main
 
       - name: Enable cache for Nix
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build package with Nix (GHC 9.4)
-        run: nix build ".#richenv-ghc94"
+      - name: Build package with Nix (${{ matrix.ghc }})
+        run: nix build ".#richenv-${{ matrix.ghc }}"
 
-  ghc-96:
-    name: "Build & test with Nix (GHC 9.6)"
-    needs: [checks]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@v27
-
-      - name: Enable cache for Nix
-        uses: DeterminateSystems/magic-nix-cache-action@v2
-
-      - name: Build package with Nix (GHC 9.6)
-        run: nix build ".#richenv-ghc96"
-
-  ghc-98:
-    name: "Build & test with Nix (GHC 9.8)"
-    needs: [checks]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@v27
-
-      - name: Enable cache for Nix
-        uses: DeterminateSystems/magic-nix-cache-action@v2
-
-      - name: Build package with Nix (GHC 9.8)
-        run: nix build ".#richenv-ghc98"
-
-  # ghc-910:
-  #   name: "Build & test with Nix (GHC 9.10)"
-  #   needs: [checks]
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macos-latest]
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - name: Install Nix
-  #       uses: cachix/install-nix-action@v27
-
-  #     - name: Enable cache for Nix
-  #       uses: DeterminateSystems/magic-nix-cache-action@v2
-
-  #     - name: Build package with Nix (GHC 9.10)
-  #       run: nix build ".#richenv-ghc910"
