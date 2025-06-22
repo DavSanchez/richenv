@@ -62,6 +62,6 @@ jobs:
       - name: Enable cache for Nix
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build package with Nix (${{ matrix.ghc }})
+      - name: Build package with Nix (${{ matrix.os}}, ${{ matrix.ghc }})
         run: nix build ".#richenv-${{ matrix.ghc }}"
 
