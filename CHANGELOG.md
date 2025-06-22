@@ -1,5 +1,9 @@
 # Revision history for richenv
 
+## 0.1.0.3 -- 2025-06-22
+
+* Update upper bound for `QuickCheck`. See <https://github.com/commercialhaskell/stackage/issues/7778#issuecomment-2981248179>.
+
 ## 0.1.0.2 -- 2024-05-20
 
 * test: switch dependency for YAML parsing from `yaml` to `HsYAML`.
