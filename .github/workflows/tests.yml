@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Nix
         uses: cachix/install-nix-action@v27
@@ -34,7 +34,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@main
@@ -54,7 +54,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         ghc: [ghc96, ghc98, ghc910, ghc912]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@main
