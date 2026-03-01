@@ -66,6 +66,7 @@ jobs:
         run: nix build ".#richenv-${{ matrix.ghc }}" -L
 
   green:
+    name: "🟢 Assert all checks passed"
     if: always()
 
     needs:
