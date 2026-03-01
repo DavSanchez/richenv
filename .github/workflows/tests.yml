@@ -24,7 +24,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Run Nix checks
-        run: nix flake check
+        run: nix flake check -L
 
   default-ghc:
     name: "Build & test with Nix (default unstable GHC)"
@@ -43,7 +43,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build default package with Nix
-        run: nix build
+        run: nix build -L
 
   ghc-versions:
     name: "Build & test with Nix (${{ matrix.ghc }})"
@@ -63,5 +63,21 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build package with Nix (${{ matrix.os}}, ${{ matrix.ghc }})
-        run: nix build ".#richenv-${{ matrix.ghc }}"
+        run: nix build ".#richenv-${{ matrix.ghc }}" -L
+
+  green:
+    if: always()
+
+    needs:
+    - checks
+    - default-ghc
+    - ghc-versions
+
+    runs-on: Ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
 
