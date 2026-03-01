@@ -24,7 +24,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Run Nix checks
-        run: nix flake check
+        run: nix flake check -L
 
   default-ghc:
     name: "Build & test with Nix (default unstable GHC)"
