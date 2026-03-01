@@ -43,7 +43,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build default package with Nix
-        run: nix build
+        run: nix build -L
 
   ghc-versions:
     name: "Build & test with Nix (${{ matrix.ghc }})"
@@ -63,5 +63,5 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build package with Nix (${{ matrix.os}}, ${{ matrix.ghc }})
-        run: nix build ".#richenv-${{ matrix.ghc }}"
+        run: nix build ".#richenv-${{ matrix.ghc }}" -L
 
