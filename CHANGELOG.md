@@ -1,5 +1,9 @@
 # Revision history for richenv
 
+## 0.1.0.4 -- 2026-03-01
+
+* Update upper bounds for `QuickCheck` (now `< 2.19`) and `quickcheck-instances` (now `< 0.5`).
+
 ## 0.1.0.3 -- 2025-06-22
 
 * Update upper bound for `QuickCheck`. See <https://github.com/commercialhaskell/stackage/issues/7778#issuecomment-2981248179>.

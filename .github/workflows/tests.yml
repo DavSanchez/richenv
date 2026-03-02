@@ -27,7 +27,7 @@ jobs:
         run: nix flake check -L
 
   default-ghc:
-    name: "Build & test with Nix (default unstable GHC)"
+    name: "Build & test with Nix (default unstable GHC, ${{ matrix.os }})"
     needs: [checks]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -46,13 +46,13 @@ jobs:
         run: nix build -L
 
   ghc-versions:
-    name: "Build & test with Nix (${{ matrix.ghc }})"
+    name: "Build & test with Nix (${{ matrix.ghc }}, ${{ matrix.os }})"
     needs: [checks]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        ghc: [ghc96, ghc98, ghc910, ghc912]
+        ghc: [ghc96, ghc98, ghc910, ghc912, ghc914]
     steps:
       - uses: actions/checkout@v6
 
@@ -66,6 +66,7 @@ jobs:
         run: nix build ".#richenv-${{ matrix.ghc }}" -L
 
   green:
+    name: "🟢 Assert all checks passed"
     if: always()
 
     needs:

@@ -4,7 +4,7 @@
 }:
 mkDerivation {
   pname = "richenv";
-  version = "0.1.0.3";
+  version = "0.1.0.4";
   src = ./.;
   libraryHaskellDepends = [ aeson base text unordered-containers ];
   testHaskellDepends = [
@@ -14,5 +14,5 @@ mkDerivation {
   testToolDepends = [ hspec-discover ];
   homepage = "https://github.com/DavSanchez/richenv";
   description = "Rich environment variable setup for Haskell";
-  license = lib.licenses.mit;
+  license = lib.licensesSpdx."MIT";
 }
