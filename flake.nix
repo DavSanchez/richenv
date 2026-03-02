@@ -50,6 +50,7 @@
           pre-commit = {
             check.enable = true;
             settings = {
+              package = pkgs.prek;
               hooks = {
                 actionlint.enable = true;
                 cabal2nix.enable = true;
