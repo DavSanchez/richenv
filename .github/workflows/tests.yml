@@ -27,7 +27,7 @@ jobs:
         run: nix flake check -L
 
   default-ghc:
-    name: "Build & test with Nix (default unstable GHC)"
+    name: "Build & test with Nix (default unstable GHC, ${{ matrix.os }})"
     needs: [checks]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -46,7 +46,7 @@ jobs:
         run: nix build -L
 
   ghc-versions:
-    name: "Build & test with Nix (${{ matrix.ghc }})"
+    name: "Build & test with Nix (${{ matrix.ghc }}, ${{ matrix.os }})"
     needs: [checks]
     runs-on: ${{ matrix.os }}
     strategy:
